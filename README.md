@@ -11,10 +11,3 @@ This aim of this project is to achieve the following:
 
 Implement an approval workflow where notations on submissions are put into a specific google drive folder (for e.g. "notes to be reviewed").
 Use the Web UI to showcase all the notes which have to be reviewed and on corrections, an approval should move it to the correct folder.
-
-
-
-
-
-
-   
