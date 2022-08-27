@@ -1,12 +1,71 @@
 # contains apis related to drive
 from google_client import *
 
+#main methods
 def listAllContents(driveClient):
+    '''
+    lists all of the file contents along with metadata
+
+    :param driveClient:
+    :return:
+    '''
     results = driveClient.files().list(pageSize=10, fields="nextPageToken, files(*)").execute()
     items = results.get('files', [])
     return items
 
+def create_nested_folders(driveClient, path):
+    '''
+    Needs to create nested folder hierarchy given a path
 
+    :param driveClient:
+    :param path:
+    :return:
+    '''
+    pass
+
+def create_file(driveClient, path, file):
+    '''
+    Create file in path
+
+    :param driveClient:
+    :param path:
+    :param file:
+    :return:
+    '''
+    pass
+
+def move_file(driveClient, oldPath, newPath):
+    '''
+    Move file from oldPath to newPath
+
+    :param driveClient:
+    :param oldPath:
+    :param newPath:
+    :return:
+    '''
+    pass
+
+def delete_file(driveClient, pathToFile):
+    '''
+    Deletes the file passed in the path
+
+    :param driveClient:
+    :param pathToFile:
+    :return:
+    '''
+    pass
+
+def delete_folder(driveClient, pathToLeafFolder):
+    '''
+    Deletes the folder present in the path to the leaf folder
+
+    :param driveClient:
+    :param pathToLeafFolder:
+    :return:
+    '''
+    pass
+
+#helper methods
 def create_folder(driveClient):
     """ Create a folder and prints the folder ID
     Returns : Folder Id
