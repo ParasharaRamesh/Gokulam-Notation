@@ -27,7 +27,8 @@ def createNotation():
             "notatedBy": str,
             "reviewedBy" str,
             "lastModifiedDate": unix timestamp ( no need to pass this as the server will take this and populate this with the current timestamp)
-        }
+        },
+        "workflowEnabled": false (if true that would mean that all files have to be reviewed and on successful review only it goes into the actual folder)
     }
 
     NOTE:
@@ -67,7 +68,8 @@ def updateNotation():
         "notations": {
             "text": str // this is something which requires lots of trial & error,there are google docs which can render color and do formatting,
             have to come up with a custom markdown language which is converted in the backend into the appropriate google docs api
-        }
+        },
+        "workflowEnabled": false (if true it would have to look at the "to be reviewed" folder and then put it into the main folder path)k
     }
 
     :return:
