@@ -42,7 +42,7 @@ def read_excel(sheetsClient, spreadSheetId, spreadSheetRange):
 
 if __name__ == "__main__":
     # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = '14CJ1ftp9MCni4kxHpSnpIg9eyp9VTldO0vzBHLVWtG0'
+    SPREADSHEET_ID = ''
     #range can be overshot it doest matter!
     RANGE_NAME = 'A1:F1'
     sheetsClient = init_google_sheets_client(True)

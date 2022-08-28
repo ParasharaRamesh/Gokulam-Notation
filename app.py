@@ -2,19 +2,12 @@ import logging
 
 from flask import Flask, request
 
-from google_connector.drive import listAllContents
-from google_connector.google_client import init_google_drive_client
-
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    app.logger.info("Trying to list all the contents in google drive now!")
-    testParentId = "1ojiJcePnz62cNR2eGD2pLLxM_RFbfoWX"
-    driveClient = init_google_drive_client()
-    listAllContents(driveClient)
-    return "This is the backend server for the gokulam school notations project"
+    return "This is the backend server for the gokulam school notations project!!"
 
 
 @app.route("/create-notation", methods=["POST"])

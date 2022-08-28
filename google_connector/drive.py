@@ -5,6 +5,7 @@ import app
 
 # main methods
 from google_connector.google_client import init_google_drive_client, init_google_docs_client
+from utils.utils import sanitizePath
 
 
 def listAllContents(driveClient):
@@ -25,6 +26,7 @@ def listAllContents(driveClient):
         app.app.logger.error(error)
         raise Exception(error)
 
+
 def create_file(docsClient, driveClient, parentId, relativePathFromParentForFile):
     '''
     Create file in path
@@ -35,8 +37,9 @@ def create_file(docsClient, driveClient, parentId, relativePathFromParentForFile
     :return:
     '''
     try:
-        app.app.logger.info(f"Trying to create file in path {relativePathFromParentForFile} in the parent with id {parentId}")
-        pathComponents = relativePathFromParentForFile.split("/")
+        app.app.logger.info(
+            f"Trying to create file in path {relativePathFromParentForFile} in the parent with id {parentId}")
+        pathComponents = sanitizePath(relativePathFromParentForFile).split("/")
         if DOCUMENT_FILE_TYPE not in relativePathFromParentForFile:
             raise Exception(
                 f"The path {relativePathFromParentForFile} does not contain the custom file type '.gokulam'. This is required to create a google doc document as specifying other file types will end up creating that particular file type")
@@ -92,9 +95,10 @@ def move_file(driveClient, parentId, oldPath, newPath):
         # gets the name of the new parent folder under which the file has to go into
         newParentFolderPath = "/".join(newPath.split("/")[:-1])
         newParentNode = get_node_from_path(driveClient, parentId, newParentFolderPath)
-        app.app.logger.info(f"The node from the new parent folder path {newParentFolderPath} is {newParentNode}. Now attempting to move the node!")
+        app.app.logger.info(
+            f"The node from the new parent folder path {newParentFolderPath} is {newParentNode}. Now attempting to move the node!")
 
-        #moves the node
+        # moves the node
         move_node_to_new_path(driveClient, oldNode["id"], newParentNode["id"])
         app.app.logger.info(f"Successfully moved node from path {oldPath} to new path {newPath}")
     except Exception as err:
@@ -185,6 +189,7 @@ def create_node(driveClient, nodeMetaData):
         app.app.logger.error(error)
         raise Exception(error)
 
+
 def move_node_to_new_path(driveClient, nodeId, newParentNodeId):
     """Move specified file to the specified folder.
     Args:
@@ -235,7 +240,7 @@ def get_node_from_path(driveClient, parentId, relativePathFromParent):
     '''
     try:
         app.app.logger.info(f"Attempting to get the node from the relative path {relativePathFromParent}")
-        pathComponents = relativePathFromParent.split("/")
+        pathComponents = sanitizePath(relativePathFromParent).split("/")
         # initially this is the parent id
         nodeId = parentId
         existingNode = None
@@ -255,13 +260,3 @@ def get_node_from_path(driveClient, parentId, relativePathFromParent):
         error = f"Unable to get the node from relative path {relativePathFromParent}. Exception is {err}"
         app.app.logger.error(error)
         raise Exception(error)
-
-
-if __name__ == "__main__":
-    testParentId = "1ojiJcePnz62cNR2eGD2pLLxM_RFbfoWX"
-    driveClient = init_google_drive_client(True)
-    docsClient = init_google_docs_client(True)
-
-    # create_file(docsClient, driveClient, testParentId, "1/2/3/4.gokulam")
-    # create_file(docsClient, driveClient, testParentId, "1/2/3/5/6.gokulam")
-    move_file(driveClient, testParentId, "1/2/3/4.gokulam", "1/2/3/5/4.gokulam")
