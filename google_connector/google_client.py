@@ -1,12 +1,11 @@
 import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 import json
-import app
+from app import app
+
 
 def extractCredentials(useLocalCreds):
-    info = None
     try:
         if useLocalCreds:
             # this is for local testing if you happen to have the credentials.json file locally!
@@ -15,9 +14,11 @@ def extractCredentials(useLocalCreds):
         else:
             # this comes from heroku
             info = json.loads(os.environ['CREDENTIALS'], strict=False)
-    except Exception as e:
-        app.app.logger.error(e)
-    return info
+        return info
+    except Exception as err:
+        error = f"Unable to extract credentials with useLocalCreds as {useLocalCreds}. Exception is {err}"
+        app.logger.error(error)
+        raise Exception(error)
 
 
 def getCredentials(useLocalCreds):
@@ -28,13 +29,15 @@ def getCredentials(useLocalCreds):
     creds = creds.with_scopes(SCOPES)
     return creds
 
+
 def init_google_docs_client(useLocalCreds=False):
     try:
         creds = getCredentials(useLocalCreds)
         docs_client = build('docs', 'v1', credentials=creds)
         return docs_client
-    except HttpError as err:
-        print(err)
+    except Exception as err:
+        app.logger.info(err)
+        raise Exception(f"Unable to initialize google docs client. Exception is {err}")
 
 
 def init_google_drive_client(useLocalCreds=False):
@@ -42,8 +45,9 @@ def init_google_drive_client(useLocalCreds=False):
         creds = getCredentials(useLocalCreds)
         drive_client = build('drive', 'v3', credentials=creds)
         return drive_client
-    except HttpError as err:
-        print(err)
+    except Exception as err:
+        app.logger.info(err)
+        raise Exception(f"Unable to initialize google drive client. Exception is {err}")
 
 
 def init_google_sheets_client(useLocalCreds=False):
@@ -51,5 +55,6 @@ def init_google_sheets_client(useLocalCreds=False):
         creds = getCredentials(useLocalCreds)
         sheets_client = build('sheets', 'v4', credentials=creds)
         return sheets_client
-    except HttpError as err:
-        print(err)
+    except Exception as err:
+        app.logger.info(err)
+        raise Exception(f"Unable to initialize google sheets client. Exception is {err}")

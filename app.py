@@ -2,13 +2,22 @@ import logging
 
 from flask import Flask, request
 
+from google_connector.drive import listAllContents
+from google_connector.google_client import init_google_drive_client
+
 app = Flask(__name__)
+
 
 @app.route('/')
 def index():
-   return "This is the backend server for the gokulam school notations project"
+    app.logger.info("Trying to list all the contents in google drive")
+    testParentId = "1ojiJcePnz62cNR2eGD2pLLxM_RFbfoWX"
+    driveClient = init_google_drive_client()
+    listAllContents(driveClient)
+    return "This is the backend server for the gokulam school notations project"
 
-@app.route("/create-notation", methods = ["POST"])
+
+@app.route("/create-notation", methods=["POST"])
 def createNotation():
     '''
     The request data should have the following information
@@ -56,7 +65,8 @@ def createNotation():
 
     return "Create notation API"
 
-@app.route("/update-notation", methods = ["PUT"])
+
+@app.route("/update-notation", methods=["PUT"])
 def updateNotation():
     '''
     The request data should have the following information
@@ -85,11 +95,13 @@ def updateNotation():
     '''
     return "Update notation API"
 
-@app.route("/update-notation-metadata", methods = ["PUT"])
+
+@app.route("/update-notation-metadata", methods=["PUT"])
 def updateNotationMetadata():
     return "Update notation data API"
 
-@app.route("/delete-notation", methods = ["DELETE"])
+
+@app.route("/delete-notation", methods=["DELETE"])
 def deleteNotationRequest():
     '''
     the doc guid can be added as query parameter in the url itself
@@ -99,7 +111,8 @@ def deleteNotationRequest():
     '''
     return "Delete notation API"
 
-@app.route("/search", methods = ["POST"])
+
+@app.route("/search", methods=["POST"])
 def search():
     '''
     Request body:
@@ -129,7 +142,7 @@ def search():
 if __name__ == "__main__":
     app.run(debug=True)
 
-#this is for enabling heroku logging
+# this is for enabling heroku logging
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
