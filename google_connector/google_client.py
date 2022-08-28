@@ -2,7 +2,7 @@ import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import json
-import gokulam_notation
+import app
 
 
 def extractCredentials(useLocalCreds):
@@ -17,7 +17,7 @@ def extractCredentials(useLocalCreds):
         return info
     except Exception as err:
         error = f"Unable to extract credentials with useLocalCreds as {useLocalCreds}. Exception is {err}"
-        gokulam_notation.app.logger.error(error)
+        app.app.logger.error(error)
         raise Exception(error)
 
 
@@ -36,7 +36,7 @@ def init_google_docs_client(useLocalCreds=False):
         docs_client = build('docs', 'v1', credentials=creds)
         return docs_client
     except Exception as err:
-        gokulam_notation.app.logger.info(err)
+        app.app.logger.info(err)
         raise Exception(f"Unable to initialize google docs client. Exception is {err}")
 
 
@@ -46,7 +46,7 @@ def init_google_drive_client(useLocalCreds=False):
         drive_client = build('drive', 'v3', credentials=creds)
         return drive_client
     except Exception as err:
-        gokulam_notation.app.logger.info(err)
+        app.app.logger.info(err)
         raise Exception(f"Unable to initialize google drive client. Exception is {err}")
 
 
@@ -56,5 +56,5 @@ def init_google_sheets_client(useLocalCreds=False):
         sheets_client = build('sheets', 'v4', credentials=creds)
         return sheets_client
     except Exception as err:
-        gokulam_notation.app.logger.info(err)
+        app.app.logger.info(err)
         raise Exception(f"Unable to initialize google sheets client. Exception is {err}")
