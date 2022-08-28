@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    app.logger.info("Trying to list all the contents in google drive")
+    app.logger.info("Trying to list all the contents in google drive now!")
     testParentId = "1ojiJcePnz62cNR2eGD2pLLxM_RFbfoWX"
     driveClient = init_google_drive_client()
     listAllContents(driveClient)
