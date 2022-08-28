@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    app.app.logger.info("Trying to list all the contents in google drive")
+    app.logger.info("Trying to list all the contents in google drive")
     testParentId = "1ojiJcePnz62cNR2eGD2pLLxM_RFbfoWX"
     driveClient = init_google_drive_client()
     listAllContents(driveClient)
@@ -145,5 +145,5 @@ if __name__ == "__main__":
 # this is for enabling heroku logging
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.app.logger.handlers = gunicorn_logger.handlers
-    app.app.logger.setLevel(gunicorn_logger.level)
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
