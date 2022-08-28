@@ -1,10 +1,12 @@
 # contains apis related to drive
 from constants import DOCUMENT_FILE_TYPE
-from google_client import *
 from google_connector.docs import create_empty_document
 from app import app
 
 # main methods
+from google_connector.google_client import init_google_drive_client, init_google_docs_client
+
+
 def listAllContents(driveClient):
     '''
     lists all of the file contents along with metadata
