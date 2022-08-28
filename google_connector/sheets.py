@@ -1,7 +1,7 @@
 # TODO: need to implement all the methods
 # Contains apis related to google sheets
 from google_client import *
-from app import app
+import app
 
 # main methods
 def append_row(sheetsClient, rowData):
@@ -33,11 +33,11 @@ def read_excel(sheetsClient, spreadSheetId, spreadSheetRange):
         values = result.get('values', [])
 
         if not values:
-            app.logger.info('No data found.')
+            app.app.logger.info('No data found.')
             return
         return values
     except Exception as err:
-        app.logger.error(err)
+        app.app.logger.error(err)
 
 
 if __name__ == "__main__":

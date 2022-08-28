@@ -1,5 +1,5 @@
 # Contains apis related to google docs
-from app import app
+import app
 
 
 def get_document(client, docId):
@@ -11,11 +11,11 @@ def get_document(client, docId):
     :return:
     '''
     try:
-        app.logger.info(f"Getting document details with docId {docId}")
+        app.app.logger.info(f"Getting document details with docId {docId}")
         return client.documents().get(documentId=docId).execute()
     except Exception as err:
         error = f"Unable to get the document with document id {docId}. Exception is {err}"
-        app.logger.error(error)
+        app.app.logger.error(error)
         raise Exception(error)
 
 
@@ -38,14 +38,14 @@ def insert_text_into_document(client, docId, text, index):
                 "text": text
             }
         }]
-        app.logger.info(
+        app.app.logger.info(
             f"Inserting the text {text} at index {index} in the document with docId {docId} with request body {requests}")
         result = client.documents().batchUpdate(documentId=docId, body={"requests": requests}).execute()
-        app.logger.info()
+        app.app.logger.info()
         return result
     except Exception as err:
         error = f"Unable to insert text {text} in document id {docId} at index {index}. Exception is {err}"
-        app.logger.error(error)
+        app.app.logger.error(error)
         raise Exception(error)
 
 
@@ -58,11 +58,11 @@ def create_empty_document(client, title):
     :return:
     '''
     try:
-        app.logger.info(f"Attempting to create a new google doc with title {title}")
+        app.app.logger.info(f"Attempting to create a new google doc with title {title}")
         result = client.documents().create(body={'title': title}).execute()
         return result["documentId"]
     except Exception as err:
         error = f"Unable to create empty document with title {title}. Exception is {err}"
-        app.logger.error(error)
+        app.app.logger.error(error)
         raise Exception(error)
 
