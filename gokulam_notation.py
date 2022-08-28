@@ -145,5 +145,5 @@ if __name__ == "__main__":
 # this is for enabling heroku logging
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.app.logger.handlers = gunicorn_logger.handlers
-    app.app.logger.setLevel(gunicorn_logger.level)
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
