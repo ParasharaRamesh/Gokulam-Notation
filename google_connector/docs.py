@@ -1,5 +1,4 @@
 # Contains apis related to google docs
-
 def get_document(client, docId):
     '''
     Gets a document given docId
@@ -9,6 +8,7 @@ def get_document(client, docId):
     :return:
     '''
     return client.documents().get(documentId=docId).execute()
+
 
 def insert_text_into_document(client, docId, text, index):
     '''
@@ -28,5 +28,17 @@ def insert_text_into_document(client, docId, text, index):
             "text": text
         }
     }]
-    result = client.documents().batchUpdate(documentId = docId, body = {"requests": requests}).execute()
+    result = client.documents().batchUpdate(documentId=docId, body={"requests": requests}).execute()
     return result
+
+
+def create_empty_document(client, title):
+    '''
+    Creates an empty google doc and gives the id
+
+    :param client:
+    :param title:
+    :return:
+    '''
+    result = client.documents().create(body={'title': title}).execute()
+    return result["documentId"]
