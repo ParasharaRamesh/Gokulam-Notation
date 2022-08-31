@@ -11,8 +11,7 @@ This aim of this project is to achieve the following:
 
 1. Finish implementing relevant google sheets apis
 2. Finish implementing relevant google docs apis
-3. Figure out how to have each google doc created be publically shareable to everyone with a link
-4. Figure out how to implement templating in google docs for the initial meta data
-5. Finish implementing the core logic:
+3. Figure out how to implement templating in google docs for the initial meta data
+4. Finish implementing the core logic:
    1. try to implement the approval workflow as well
    2. ensure models are well defined
