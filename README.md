@@ -7,7 +7,12 @@ This aim of this project is to achieve the following:
 2. The backend should then parse the notations and then save all of the content in google drive by programmatically creating a recursive hierarchy of lesson notes in the form of google docs
 3. Additionally, this backend will also support any quick querying and searching of lesson notes by systematically saving all of the notes in a google sheet
 
-**FUTURE WORK**
+**TODO**
 
-Implement an approval workflow where notations on submissions are put into a specific google drive folder (for e.g. "notes to be reviewed").
-Use the Web UI to showcase all the notes which have to be reviewed and on corrections, an approval should move it to the correct folder.
+1. Finish implementing relevant google sheets apis
+2. Finish implementing relevant google docs apis
+3. Figure out how to have each google doc created be publically shareable to everyone with a link
+4. Figure out how to implement templating in google docs for the initial meta data
+5. Finish implementing the core logic:
+   1. try to implement the approval workflow as well
+   2. ensure models are well defined
