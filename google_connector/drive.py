@@ -31,8 +31,6 @@ def create_drive_node(docsClient, driveClient, parentId, relativePathFromParentF
                       useTemplate=False,
                       relativePathFromParentForTemplateFile=None):
     '''
-    TODO. add flags for copying/creating
-
     Create file in path
 
     :param driveClient:
