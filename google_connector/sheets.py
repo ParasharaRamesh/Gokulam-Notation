@@ -1,18 +1,19 @@
-# TODO: need to implement all the methods
+''  # TODO: need to implement all the methods
 # Contains apis related to google sheets
 from google_client import *
 import app
+
 
 # main methods
 def append_row(sheetsClient, rowData):
     pass
 
 
-def delete_row(sheetsClient, rowId):
+def read_row(sheetsClient, rowId):
     pass
 
 
-def read_row(sheetsClient, rowId):
+def delete_row(sheetsClient, rowId):
     pass
 
 
@@ -25,7 +26,7 @@ def search(sheetsClient, query):
 
 
 # helper methods
-def read_excel(sheetsClient, spreadSheetId, spreadSheetRange):
+def read_range(sheetsClient, spreadSheetId, spreadSheetRange):
     try:
         # Call the Sheets API
         sheet = sheetsClient.spreadsheets()
@@ -40,10 +41,59 @@ def read_excel(sheetsClient, spreadSheetId, spreadSheetRange):
         app.app.logger.error(err)
 
 
+def write_range(sheetsClient, spreadSheetId, spreadSheetRange, values, value_input_option="USER_ENTERED"):
+    '''
+    Write values into range
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :param spreadSheetRange:
+    :param values: row wise list of lists
+    :param value_input_option:
+    :return:
+    '''
+    try:
+        body = {
+            'values': values
+        }
+        result = sheetsClient.spreadsheets().values().update(
+            spreadsheetId=spreadSheetId, range=spreadSheetRange,
+            valueInputOption=value_input_option, body=body).execute()
+
+        return result
+    except Exception as error:
+        print(f"An error occurred: {error}")
+        return error
+
+
+def append_values(sheetsClient, spreadSheetId, spreadSheetRange, values, value_input_option="USER_ENTERED"):
+    body = {
+        'values': values
+    }
+    result = sheetsClient.spreadsheets().values().append(
+        spreadsheetId=spreadSheetId, range=spreadSheetRange,
+        valueInputOption=value_input_option, body=body).execute()
+    print(f"{(result.get('updates').get('updatedCells'))} cells appended.")
+    return result
+
+
 if __name__ == "__main__":
     # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = ''
-    #range can be overshot it doest matter!
-    RANGE_NAME = 'A1:F1'
+    SPREADSHEET_ID = '14CJ1ftp9MCni4kxHpSnpIg9eyp9VTldO0vzBHLVWtG0'
+    # range can be overshot it doest matter!
+    RANGE_NAME = 'A1:B1'
     sheetsClient = init_google_sheets_client(True)
-    read_excel(sheetsClient, SPREADSHEET_ID, RANGE_NAME)
+
+    values = [
+        ['A', 'B'],
+        ['C', 'D']
+    ]
+
+    appendValues = [
+        ['X', 'Y'],
+        ['W', 'Z']
+    ]
+    # write_range(sheetsClient, SPREADSHEET_ID, RANGE_NAME, values)
+    append_values(sheetsClient, SPREADSHEET_ID, RANGE_NAME, appendValues)
+    # read_excel(sheetsClient, SPREADSHEET_ID, RANGE_NAME)
+''
