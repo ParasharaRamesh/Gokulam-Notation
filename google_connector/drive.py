@@ -1,5 +1,4 @@
 # contains apis related to drive
-from constants import DOCUMENT_FILE_TYPE
 from google_connector.docs import create_empty_document
 import app
 
@@ -27,27 +26,31 @@ def listAllContents(driveClient):
         raise Exception(error)
 
 
-def create_file(docsClient, driveClient, parentId, relativePathFromParentForFile):
+def create_drive_node(docsClient, driveClient, parentId, relativePathFromParentForFile,
+                      isNewNodeAFile=False,
+                      useTemplate=False,
+                      relativePathFromParentForTemplateFile=None):
     '''
+    TODO. add flags for copying/creating
+
     Create file in path
 
     :param driveClient:
     :param parentId:
-    :param relativePathFromParentForFile: e.g. /notations/english/shree/endaroMahanubhavulu.gokulam ( NOTE:file types have to end with gokulam)
+    :param relativePathFromParentForFile: can be both folders or files
+    :param useTemplate: if True then uses the template google doc present in the template path to copy into this
+    :param relativePathFromParentForTemplateFile:
     :return:
     '''
     try:
         app.app.logger.info(
             f"Trying to create file in path {relativePathFromParentForFile} in the parent with id {parentId}")
         pathComponents = sanitizePath(relativePathFromParentForFile).split("/")
-        if DOCUMENT_FILE_TYPE not in relativePathFromParentForFile:
-            raise Exception(
-                f"The path {relativePathFromParentForFile} does not contain the custom file type '.gokulam'. This is required to create a google doc document as specifying other file types will end up creating that particular file type")
 
         # initially this is the parent id
         nodeId = parentId
-        for component in pathComponents:
-            isLeaf = DOCUMENT_FILE_TYPE in component
+        for i, component in enumerate(pathComponents):
+            isLeaf = (i == len(pathComponents) - 1)
             existingNode = get_node_details_inside_parent(driveClient, component, nodeId)
             if existingNode == None:
                 if not isLeaf:
@@ -56,12 +59,16 @@ def create_file(docsClient, driveClient, parentId, relativePathFromParentForFile
                     newNodeMetaData = construct_node_metaData(nodeId, component)
                     newNode = create_node(driveClient, newNodeMetaData)
                     nodeId = newNode["id"]
+                elif not isNewNodeAFile:
+                    app.app.logger.info(f"folder name {component} does not exist! Creating & cd'ing into {component}")
+                    # create folder and cd
+                    newNodeMetaData = construct_node_metaData(nodeId, component)
+                    newNode = create_node(driveClient, newNodeMetaData)
+                    nodeId = newNode["id"]
                 else:
-                    # create document
-                    app.app.logger.info(f"file name {component} does not exist! Creating google doc {component}")
-                    docId = create_empty_document(docsClient, component)
-                    # move this file to the current folder ( this is the hack to create a google document inside a drive folder)
-                    move_node_to_new_path(driveClient, docId, nodeId)
+                    # only if it is a leaf and is a file create or copy it from a preexisting template
+                    createDocumentOrCopyFromTemplate(parentId, component, docsClient, driveClient, nodeId, useTemplate,
+                                                     relativePathFromParentForTemplateFile)
             elif isLeaf:
                 app.app.logger.warn(f"File with name {component} already exists!")
                 return
@@ -132,6 +139,37 @@ def delete_node_at_path(driveClient, parentId, relativePathFromParent):
 
 
 # helper methods
+def createDocumentOrCopyFromTemplate(parentId, name, docsClient, driveClient, targetNodeId, useTemplate,
+                                     relativePathFromParentForTemplateFile):
+    '''
+    Either creates a new google doc or copies from an existing template google doc specified in the template path
+
+    :param parentId:
+    :param name:
+    :param docsClient:
+    :param driveClient:
+    :param targetNodeId:
+    :param useTemplate:
+    :param relativePathFromParentForTemplateFile:
+    :return:
+    '''
+    if not useTemplate:
+        # create document
+        app.app.logger.info(f"file name {name} does not exist! Creating google doc {name}")
+        docId = create_empty_document(docsClient, name)
+        # move this file to the current folder ( this is the hack to create a google document inside a drive folder)
+        move_node_to_new_path(driveClient, docId, targetNodeId)
+        app.app.logger.info(f"Created google doc with name {name} in the location {targetNodeId}!")
+    else:
+        # copy existing google doc into new parent Node id
+        app.app.logger.info(
+            f"file name {name} is being created by copying from the template present in relative path {relativePathFromParentForTemplateFile}")
+        templateNode = get_node_from_path(driveClient, parentId, relativePathFromParentForTemplateFile)
+        copy_node_into_target(driveClient, templateNode["id"], targetNodeId, name)
+        app.app.logger.info(
+            f"Created google doc with name {name} in the location {targetNodeId} by copying from template present in {relativePathFromParentForTemplateFile}!")
+
+
 def get_node_details_inside_parent(driveClient, name, parentId):
     '''
     Get node meta data details inside a parent with id
@@ -258,5 +296,26 @@ def get_node_from_path(driveClient, parentId, relativePathFromParent):
         return leafNode
     except Exception as err:
         error = f"Unable to get the node from relative path {relativePathFromParent}. Exception is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def copy_node_into_target(driveClient, source_node_id, target_parent_node_id, new_name):
+    '''
+    Copies the node specified in the source_node_id into the folder with id target_parent_node_id
+
+    :param driveClient:
+    :param source_node_id:
+    :param target_parent_node_id:
+    :param new_name:
+    :return:
+    '''
+    try:
+        app.app.logger.info(
+            f"Attempting to copy the node with source id {source_node_id} into target node with id {target_parent_node_id} with new name {new_name}")
+        return driveClient.files().copy(fileId=source_node_id,
+                                        body={"parents": [target_parent_node_id], 'name': new_name}).execute()
+    except Exception as err:
+        error = f"Unable to copy source node {source_node_id} into target node {target_parent_node_id} with new name {new_name}. Exception is {err}"
         app.app.logger.error(error)
         raise Exception(error)

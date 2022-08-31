@@ -22,9 +22,9 @@ def createNotation():
             "raga": str,
             "arohanam": str,
             "avarohanam": str,
-            "melakartaParent": str,
+            "ragaMetaData": str,
             "composer": str,
-            "taala": str,
+            "tala": str,
             "type": str (sarali, jantai, varnams, kritis etc), // if it is of type theory then other fields are optional
             "notatedBy": str,
             "reviewedBy" str,
@@ -40,7 +40,7 @@ def createNotation():
 
     STEPS:
         1. perform basic validations on request data
-        2. Create a google doc with the name "lessonName"( provided in metadata) in the google drive path /notations/{language}/{raga}/{taala}/{lessonName}.doc and get the doc link & the doc guid
+        2. Create a google doc with the name "lessonName"( provided in metadata) in the google drive path /notations/{language}/{raga}/{tala}/{lessonName}.doc and get the doc link & the doc guid
         3. In the google doc ensure that the metadata is added directly ( have to experiment to see how to add headings etc). add template markings to add notations
         4. take all the values in the metadata along with the doc guid & doc link and add it in the google sheets as a row
         5. return body {
@@ -117,9 +117,9 @@ def search():
             "raga": str,
             "arohanam": str,
             "avarohanam": str,
-            "melakartaParent": str,
+            "ragaMetaData": str,
             "composer": str,
-            "taala": str,
+            "tala": str,
             "type": str (sarali, jantai, varnams, kritis etc), // if it is of type theory then other fields are optional
             "notatedBy": str,
             "reviewedBy" str,
