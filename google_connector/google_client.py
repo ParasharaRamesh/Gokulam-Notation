@@ -3,6 +3,9 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import json
 import app
+import pygsheets
+
+from constants import SCOPES
 
 
 def extractCredentials(useLocalCreds):
@@ -22,8 +25,6 @@ def extractCredentials(useLocalCreds):
 
 
 def getCredentials(useLocalCreds):
-    SCOPES = ["https://www.googleapis.com/auth/documents", "https://www.googleapis.com/auth/drive",
-              "https://www.googleapis.com/auth/spreadsheets"]
     credentials = extractCredentials(useLocalCreds)
     creds = service_account.Credentials.from_service_account_info(credentials)
     creds = creds.with_scopes(SCOPES)
@@ -58,3 +59,13 @@ def init_google_sheets_client(useLocalCreds=False):
     except Exception as err:
         app.app.logger.info(err)
         raise Exception(f"Unable to initialize google sheets client. Exception is {err}")
+
+#this is another client for google sheets which has an easier to work with API interface
+def init_google_sheets_client_using_pygsheets(useLocalCreds=False):
+    try:
+        creds = getCredentials(useLocalCreds)
+        sheets_client = pygsheets.authorize(custom_credentials=creds, scopes=SCOPES)
+        return sheets_client
+    except Exception as err:
+        app.app.logger.info(err)
+        raise Exception(f"Unable to initialize google sheets client using pygsheets. Exception is {err}")
