@@ -1,10 +1,9 @@
 # contains apis related to drive
-from google_connector.docs import create_empty_document
+from core.google_connector.docs import create_empty_document
 import app
 
 # main methods
-from google_connector.google_client import init_google_drive_client, init_google_docs_client
-from utils.utils import sanitizePath
+from core.utils import sanitizePath
 
 
 def listAllContents(driveClient):
