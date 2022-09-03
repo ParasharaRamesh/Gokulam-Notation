@@ -1,5 +1,5 @@
 # Contains apis related to google sheets
-from constants import SHEET_NO
+from core.constants.constants import SHEET_NO
 from google_client import *
 import app
 

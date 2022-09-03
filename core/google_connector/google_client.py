@@ -5,7 +5,7 @@ import json
 import app
 import pygsheets
 
-from constants import SCOPES
+from core.constants.constants import SCOPES
 
 
 def extractCredentials(useLocalCreds):
