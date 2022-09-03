@@ -5,3 +5,4 @@ flask
 flask-restx
 gunicorn
 pygsheets
+werkzeug
