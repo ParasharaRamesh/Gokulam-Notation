@@ -6,7 +6,7 @@ from dateutil.tz import gettz
 class Notation:
     def __init__(self,
                  name=None,
-                 language=LANGUAGES.ENGLISH,
+                 language=LANGUAGES.ENGLISH.value,
                  type=None,
                  raga=None,
                  tala=None,

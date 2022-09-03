@@ -5,4 +5,8 @@ SCOPES = ["https://www.googleapis.com/auth/documents",
           "https://www.googleapis.com/auth/drive",
           "https://www.googleapis.com/auth/spreadsheets"]
 SHEET_NO = 'Sheet1'
-LANGUAGES = Enum(ENGLISH="english", KANNADA="kannada")
+
+
+class LANGUAGES(Enum):
+    ENGLISH = "english"
+    KANNADA = "kannada"
