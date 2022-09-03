@@ -5,4 +5,4 @@ gunicorn
 pygsheets
 flask == 2.1.2
 flask-restx >= 0.5.1
-werkzeug == 2.12
+werkzeug == 2.1.2
