@@ -1,6 +1,8 @@
 # Contains apis related to google sheets
+from constants import SHEET_NO
 from google_client import *
 import app
+
 
 # main methods
 def append(sheetsClient, spreadSheetId, notationMetaData):
@@ -67,111 +69,254 @@ def search(sheetsClient, spreadSheetId, query):
 
 
 # helper methods
-def insert_row(spreadSheetId, rowIndex, row):
+def construct_worksheet_client(sheetsClient, spreadSheetId):
+    '''
+    returns a worksheetclient
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :return:
+    '''
+    try:
+        app.app.logger.info(f"Attempting to open worksheet with id {spreadSheetId}")
+        data = sheetsClient.open_by_key(spreadSheetId)
+        return data.worksheet_by_title(SHEET_NO)
+    except Exception as err:
+        error = f"Error while attempting to open worksheet with id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def insert_row(sheetsClient, spreadSheetId, rowIndex, row):
     '''
 
+    :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex: 0 based indexing
     :param row: list of values
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to insert row {row} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.insert_rows(rowIndex, values=row)
+    except Exception as err:
+        error = f"Error while attempting to insert row {row} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
-def update_row(spreadSheetId, rowIndex, newRow):
+
+def update_row(sheetsClient, spreadSheetId, rowIndex, newRow):
     '''
 
+    :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex: 1 based indexing
     :param newRow:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to update row {newRow} into spread sheet with id {spreadSheetId} @ the index(1 based) rowIndex {rowIndex}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.update_row(rowIndex, newRow, col_offset=0)
+    except Exception as err:
+        error = f"Error while attempting to update row {newRow} into spread sheet with id {spreadSheetId} @ the index(1 based) rowIndex {rowIndex}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
-def update_cell(spreadSheetId, rowIndex, columnIndex, value):
+
+def update_col(sheetsClient, spreadSheetId, colIndex, newCol):
     '''
 
+    :param sheetsClient:
+    :param spreadSheetId:
+    :param colIndex: 1 based indexing
+    :param newCol:
+    :return:
+    '''
+    try:
+        app.app.logger.info(
+            f"Attempting to update col {newCol} into spread sheet with id {spreadSheetId} @ the index(1 based) colIndex {colIndex}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.update_col(colIndex, newCol, row_offset=0)
+    except Exception as err:
+        error = f"Error while attempting to update col {newCol} into spread sheet with id {spreadSheetId} @ the index(1 based) colIndex {colIndex}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def update_cell(sheetsClient, spreadSheetId, rowIndex, colIndex, value):
+    '''
+
+    :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex: 1 based indexing
-    :param columnIndex: 1 based indexing
+    :param colIndex: 1 based indexing
     :param value:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to update cell value present at position({rowIndex}, {colIndex}) (1 indexing based) into spread sheet with id {spreadSheetId} with value {value}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.update_value((rowIndex, colIndex), value)
+    except Exception as err:
+        error = f"Error while attempting to update cell value present at position({rowIndex}, {colIndex}) (1 indexing based) into spread sheet with id {spreadSheetId} with value {value}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
-def delete_row(spreadSheetId, rowIndex):
+
+def delete_row(sheetsClient, spreadSheetId, rowIndex, noOfRows=1):
     '''
 
+    :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex: 1 based
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to delete {noOfRows} rows present @ the row index {rowIndex} in spreadsheet with id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.delete_rows(rowIndex, number=noOfRows)
+    except Exception as err:
+        error = f"Error while Attempting to delete {noOfRows} rows present @ the row index {rowIndex} in spreadsheet with id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
-def get_row(spreadSheetId, rowIndex):
+
+def delete_col(sheetsClient, spreadSheetId, colIndex, noOfCols=1):
     '''
 
+    :param sheetsClient:
+    :param spreadSheetId:
+    :param colIndex: 1 based
+    :return:
+    '''
+    try:
+        app.app.logger.info(
+            f"Attempting to delete {noOfCols} columns present @ the column index {colIndex} in spreadsheet with id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.delete_cols(colIndex, number=noOfCols)
+    except Exception as err:
+        error = f"Error while attempting to delete {noOfCols} cols present @ the column index {colIndex} in spreadsheet with id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def get_row(sheetsClient, spreadSheetId, rowIndex):
+    '''
+
+    :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to get the row present at the index {rowIndex} in the spreadSheet id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.get_row(rowIndex, include_tailing_empty=False)
+    except Exception as err:
+        error = f"Error while attempting to get the row present at the index {rowIndex} in the spreadSheet id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
-def get_entire_data(spreadSheetId):
+
+def get_col(sheetsClient, spreadSheetId, colIndex):
+    '''
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :param colIndex:
+    :return:
+    '''
+    try:
+        app.app.logger.info(
+            f"Attempting to get the col present at the index {colIndex} in the spreadSheet id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.get_col(colIndex, include_tailing_empty=False)
+    except Exception as err:
+        error = f"Error while attempting to get the col present at the index {colIndex} in the spreadSheet id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def get_entire_data(sheetsClient, spreadSheetId):
     '''
     can use get_all_values or can convert to dataframe and then get the entire data frame as is
 
+    :param sheetsClient:
     :param spreadSheetId:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(f"Attempting to get the entire metadata & data present in spreadSheet id {spreadSheetId}")
+        return sheetsClient.sheet.get(SPREADSHEET_ID)
+    except Exception as err:
+        error = f"Error while attempting to get the entire metadata & data present in spreadSheet id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def get_data(sheetsClient, spreadSheetId):
+    '''
+    can use get_all_values or can convert to dataframe and then get the entire data frame as is
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :return:
+    '''
+    try:
+        app.app.logger.info(f"Attempting to get the entire data present in spreadSheet id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.get_all_values(include_tailing_empty=False, include_tailing_empty_rows=False)
+    except Exception as err:
+        error = f"Error while attempting to get the entire data present in spreadSheet id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def get_data_as_dataframe(sheetsClient, spreadSheetId):
+    '''
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :return:
+    '''
+    try:
+        app.app.logger.info(
+            f"Attempting to get the entire data present in spreadSheet id {spreadSheetId} as a pandas dataframe")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        return worksheetClient.get_as_df(include_tailing_empty=False, include_tailing_empty_rows=False)
+    except Exception as err:
+        error = f"Error while attempting to get the entire data present in spreadSheet id {spreadSheetId} as a pandas dataframe. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+
+def set_data_as_dataframe(sheetsClient, spreadSheetId, df):
+    '''
+
+    :param sheetsClient:
+    :param spreadSheetId:
+    :param df: dataframe
+    :return:
+    '''
+    try:
+        app.app.logger.info(f"Attempting to get the entire data present in spreadSheet id {spreadSheetId}")
+        worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        # setting the entire data as a pandas dataframe
+        return worksheetClient.set_dataframe(df, start=(1, 1))
+    except Exception as err:
+        error = f"Error while attempting to get the entire data present in spreadSheet id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
 
 if __name__ == "__main__":
     # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = '14CJ1ftp9MCni4kxHpSnpIg9eyp9VTldO0vzBHLVWtG0'
-
+    SPREADSHEET_ID = '<spreadsheet id goes here>'
     sheetsClient = init_google_sheets_client_using_pygsheets(True)
-
-    # read all data
-    # data = sheetsClient.sheet.get(SPREADSHEET_ID)
-
-    # open by id
-    data = sheetsClient.open_by_key(SPREADSHEET_ID)
-    wks = data.worksheet_by_title('Sheet1')
-
-    # get all data as list of lists ( row wise)
-    # values = wks.get_all_values(include_tailing_empty=False, include_tailing_empty_rows=False)
-
-    # get row ( 1 indexing)
-    # row = wks.get_row(1, include_tailing_empty=False)
-
-    # get column ( 1 indexing)
-    # col = wks.get_col(1, include_tailing_empty=False)
-
-    # get as pandas dataframe ( considers 1st row as heading )
-    # sdf = wks.get_as_df(include_tailing_empty=False, include_tailing_empty_rows=False)
-
-    # delete row ( does exactly what I want)
-    # wks.delete_rows(1, number=1)
-
-    # delete cols ( does exactly what I want)
-    # wks.delete_cols(1, number=1)
-
-    # insert column(0 based indexing)
-    # result = wks.insert_cols(2, values=["1", "2","3"])
-
-    # insert row(0 based indexing)
-    # result = wks.insert_rows(5, values=["1", "2","3"])
-
-    # update row ( 1 based indexing)
-    # wks.update_row(1, ["s", "e", "m"], col_offset=0)
-
-    # update col ( 0 based indexing)
-    # wks.update_col(1, ["a", "b", "c"], row_offset=0)
-
-    # update cell
-    # wks.update_value('A1', "testing")
-    # wks.update_value((1,1), "shatas")
-
-    pass
-    # set dataframe
-    # wks.set_dataframe(df, start=(1,1))
