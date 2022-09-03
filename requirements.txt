@@ -3,8 +3,7 @@ google-auth-httplib2
 google-auth-oauthlib
 gunicorn
 pygsheets
-dateutil
-datetime
+python-dateutil
 flask == 2.1.2
 flask-restx >= 0.5.1
 werkzeug == 2.1.2
