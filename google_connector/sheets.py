@@ -3,6 +3,7 @@ from constants import SHEET_NO
 from google_client import *
 import app
 
+#TODO integrate with the models themselves and create classes for everything for consistency sake!
 
 # main methods
 def append(sheetsClient, spreadSheetId, notationMetaData):
@@ -11,10 +12,18 @@ def append(sheetsClient, spreadSheetId, notationMetaData):
 
     :param sheetsClient:
     :param spreadSheetId:
-    :param notationMetaData:
+    :param notationMetaData: list of values in the order mentioned in the google sheets
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to append metadata {notationMetaData} into spread sheet with id {spreadSheetId}")
+        rowIndex = len(get_data(sheetsClient, spreadSheetId))
+        return insert_row(sheetsClient, spreadSheetId, rowIndex=rowIndex, row=notationMetaData)
+    except Exception as err:
+        error = f"Error while attempting to append metadata {notationMetaData} into spread sheet with id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
 
 def read(sheetsClient, spreadSheetId, docId):
@@ -318,5 +327,6 @@ def set_data_as_dataframe(sheetsClient, spreadSheetId, df):
 
 if __name__ == "__main__":
     # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = '<spreadsheet id goes here>'
+    SPREADSHEET_ID = '14CJ1ftp9MCni4kxHpSnpIg9eyp9VTldO0vzBHLVWtG0'
     sheetsClient = init_google_sheets_client_using_pygsheets(True)
+    append(sheetsClient,SPREADSHEET_ID,["p","a","r"])

@@ -1,9 +1,13 @@
 import logging
+from flask import Flask
 
-from flask import Flask, request
+'''
+TODO
+1. Have to figure out how to add models properly
+2. Enable flask
+'''
 
 app = Flask(__name__)
-
 
 @app.route('/')
 def index():
