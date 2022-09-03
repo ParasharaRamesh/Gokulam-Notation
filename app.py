@@ -11,11 +11,12 @@ TODO
 app = Flask(__name__)
 
 swagger_app = Api(app=app, title="Gokulam Notations Swagger")
+aboutNamespace = swagger_app.namespace("about", description="About")
 namespace = swagger_app.namespace("notation", description="Managing notations")
 
 
-@namespace.route("/")
-class NotationContoller(Resource):
+@aboutNamespace.route("/")
+class NotationController(Resource):
     def get(self):
         return "This is the backend server for the gokulam school notations project!!"
 
