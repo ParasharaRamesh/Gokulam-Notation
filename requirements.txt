@@ -1,8 +1,8 @@
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-flask
-flask-restx
 gunicorn
 pygsheets
-werkzeug
+flask == 2.1.2
+flask-restx >= 0.5.1
+werkzeug == 2.12
