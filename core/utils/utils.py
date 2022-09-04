@@ -1,5 +1,6 @@
 from typing import List
 
+import app
 from core.models.models import Notation
 
 
@@ -93,11 +94,18 @@ def updateNotationWithOnlyFieldsWhichHaveChanged(existingNotation: Notation, new
 
 
 def apply_notation_masks(data, query: Notation):
+    if not isStringEmpty(query.docId):
+        app.app.logger.info("Doc id column is being filtered..")
+        mask = data["Google Doc Id"].str.contains(query.docId, case=False, na=False)
+        data = data[mask]
+
     if not isStringEmpty(query.type):
+        app.app.logger.info("Type column is being filtered..")
         mask = data["Type"].str.contains(query.type, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.name):
+        app.app.logger.info("Name column is being filtered..")
         mask = data["Name"].str.contains(query.name, case=False, na=False)
         data = data[mask]
 
@@ -106,34 +114,37 @@ def apply_notation_masks(data, query: Notation):
         data = data[mask]
 
     if not isStringEmpty(query.raga):
+        app.app.logger.info("Raga column is being filtered..")
         mask = data["Raga"].str.contains(query.raga, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.tala):
+        app.app.logger.info("Tala column is being filtered..")
         mask = data["Tala"].str.contains(query.tala, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.composer):
+        app.app.logger.info("Composer column is being filtered..")
         mask = data["Composer"].str.contains(query.composer, case=False, na=False)
         data = data[mask]
 
-    if not isStringEmpty(query.docId):
-        mask = data["Google Doc Id"].str.contains(query.docId, case=False, na=False)
-        data = data[mask]
-
     if not isStringEmpty(query.docLink):
+        app.app.logger.info("Doc link column is being filtered..")
         mask = data["Google Doc Link"].str.contains(query.docLink, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.notatedBy):
+        app.app.logger.info("Notated by column is being filtered..")
         mask = data["Notated By"].str.contains(query.notatedBy, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.reviewedBy):
+        app.app.logger.info("Reviewed by column is being filtered..")
         mask = data["Reviewed By"].str.contains(query.reviewedBy, case=False, na=False)
         data = data[mask]
 
     if not isStringEmpty(query.lastModified):
+        app.app.logger.info("Last modified column is being filtered..")
         mask = data["Last Modified Date"].str.contains(query.lastModified, case=False, na=False)
         data = data[mask]
 

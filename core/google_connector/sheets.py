@@ -120,6 +120,7 @@ def search(sheetsClient, spreadSheetId, query: Notation) -> List[Notation]:
         data = get_data_as_dataframe(sheetsClient, spreadSheetId)
         filteredData = apply_notation_masks(data, query)
         searchResults = filteredData.reset_index().to_dict("list")
+        app.app.logger.info(f"No of search results {len(searchResults['index'])}")
         return construct_notations_from_row(searchResults)
     except Exception as err:
         error = f"Error while attempting to search for notations matching query {query} from spreadSheet with id {spreadSheetId}. Error is {err}"
