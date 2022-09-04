@@ -1,5 +1,6 @@
 from flask_restx import Resource, Namespace, fields, reqparse
 
+import logging
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
@@ -41,7 +42,6 @@ notationModel = api.model("Notation", {
 docIdParser = api.parser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
-
 # all endpoints
 @api.route("")
 class Notation(Resource):
@@ -55,17 +55,17 @@ class Notation(Resource):
         docId is a required url parameter
         :return:
         '''
-        app.app.logger("Starting get notation endpoint..")
+        api.logger.info("Starting get notation endpoint..")
         args = docIdParser.parse_args()
-        app.app.logger.info(f"docIdParser args are {args}")
+        api.logger.info(f"docIdParser args are {args}")
         docId = args["docId"]
         try:
-            app.app.logger.info(
+            api.logger.info(
                 f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
             return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
             error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
-            app.app.logger.error(error)
+            api.logger.error(error)
 
     @api.marshal_with(notationModel, skip_none=True)
     @api.expect(notationModel, validate=True)
