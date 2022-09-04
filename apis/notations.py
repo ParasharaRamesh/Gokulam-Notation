@@ -22,6 +22,7 @@ notationModel = api.model("Notation", {
     "docLink": fields.String(required=False, description="Google doc url for the notations"),
     "docId": fields.String(required=True, description="Google doc id"),
     "type": fields.String(required=False, description="Type of the lesson e.g. varnam, kriti etc"),
+    "notation": fields.String(required=False, description="The entire notation (along with tags) to be written into the google doc"),
     "raga": fields.String(required=False, description="Raga the composition is in"),
     "tala": fields.String(required=False, description="Tala the composition is in"),
     "composer": fields.String(required=False, description="The composer of the composition"),
