@@ -194,7 +194,7 @@ class NotationMetadataController(Resource):
             data = request.json
             app.app.logger.info(f"request is {data}")
             notation = Notation(**data)
-            # last modified needs to be explicity present in request data for it to be filtered
+            # last modified needs to be explicitly present in request data for it to be filtered
             if "lastModified" not in data:
                 notation.lastModified = None
             app.app.logger.info(
@@ -221,7 +221,7 @@ class SearchController(Resource):
             data = request.json
             app.app.logger.info(f"request is {data}")
             query = Notation(**data)
-            # last modified needs to be explicity present in request data for it to be filtered
+            # last modified needs to be explicitly present in request data for it to be filtered
             if "lastModified" not in data:
                 query.lastModified = None
             app.app.logger.info(
