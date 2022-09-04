@@ -3,20 +3,22 @@ from core.models.models import Notation
 
 api = Namespace("notations", description="All endpoints related to notations")
 
-@api.route("/about")
-class About(Resource):
-    def get(self):
-        return "This is the controller for notations"
-
 @api.route("/")
 class Notation(Resource):
     @api.doc("Get notation metadata")
     def get(self):
+        '''
+        This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
+
+        :return:
+        '''
         return "Get notation API"
 
     @api.doc("Create notation doc & associated metadata in google sheets")
     def post(self):
         '''
+        This endpoint is for creating a notation row in the google sheets and creating an empty doc in google docs at the specified location
+
     The request data should have the following information
     {
         "metaData": {
@@ -63,7 +65,7 @@ class Notation(Resource):
     @api.doc("Update existing notation doc after being notated")
     def put(self):
         '''
-        This is for writing
+        This is for writing the notation into the notation doc
 
         The request data should have the following information
         {
@@ -94,6 +96,8 @@ class Notation(Resource):
     @api.doc("Remove notation & its associated metadata")
     def delete(self):
         '''
+        This is for deleting a notation row in sheets and its corresponding document from docs
+
         the doc guid can be added as query parameter in the url itself
 
         this should delete the row in the google sheets and also remove the notation file from the google drive location
@@ -115,6 +119,8 @@ class Search(Resource):
     @api.doc("Search across the notation legend google sheets by using filters")
     def post(self):
         '''
+        This is for querying the worksheet with query strings for searching across each column
+
     Request body:
     {
         "query": {
