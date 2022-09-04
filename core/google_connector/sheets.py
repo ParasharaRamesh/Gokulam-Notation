@@ -44,9 +44,8 @@ def read(sheetsClient, spreadSheetId, docId):
             f"Attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
         data = get_data_as_dataframe(sheetsClient, spreadSheetId)
         mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
-        row = data[mask]
-        row = row.reset_index().to_dict("list")
-        return row
+        row = data[mask].reset_index().to_dict("list")
+        return construct_notations_from_row(row)[0]
     except Exception as err:
         error = f"Error while attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
         app.app.logger.error(error)

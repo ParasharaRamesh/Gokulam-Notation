@@ -1,10 +1,40 @@
-from flask_restx import Resource, Namespace
+from flask_restx import Resource, Namespace, fields, reqparse
+
+import app
+from app import driveClient, docsClient, sheetsClient
+from core.constants.constants import LEGEND_SPREADSHEET_ID
+from core.google_connector.sheets import read
 from core.models.models import Notation
 
 api = Namespace("notations", description="All endpoints related to notations")
 
+notationModel = api.model("Notation", {
+    "name": fields.String(required=False, description="Name of the lesson being notated"),
+    "language": fields.String(required=False, description="Language could be (kannada/english)"),
+    "docLink": fields.String(required=False, description="Google doc url for the notations"),
+    "docId": fields.String(required=True, description="Google doc id"),
+    "type": fields.String(required=False, description="Type of the lesson e.g. varnam, kriti etc"),
+    "raga": fields.String(required=False, description="Raga the composition is in"),
+    "tala": fields.String(required=False, description="Tala the composition is in"),
+    "composer": fields.String(required=False, description="The composer of the composition"),
+    "arohanam": fields.String(required=False, description="Arohanam of the raga"),
+    "avarohanam": fields.String(required=False, description="Avaraohanam of the raga"),
+    "comments": fields.String(required=False, description="Optional comments"),
+    "ragaMetaData": fields.String(required=False,
+                                  description="Additional meta data for raga. e.g. Janyam of 29th melakarta"),
+    "notatedBy": fields.String(required=False, description="Name of the person who has contributed"),
+    "reviewedBy": fields.String(required=False,
+                                description="Name of the person who has reviewed it (can be the same as the contributor)"),
+    "lastModified": fields.String(required=False, readonly=True,
+                                  description="String representation of the current timestamp. ")
+})
+
+docIdParser = api.parser()
+docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
+
 @api.route("/")
 class Notation(Resource):
+    @api.marshal_with(notationModel, skip_none=True)
     @api.doc("Get notation metadata")
     def get(self):
         '''
@@ -12,8 +42,18 @@ class Notation(Resource):
 
         :return:
         '''
-        return "Get notation API"
+        try:
+            args = docIdParser.parse_args()
+            docId = args["docId"]
+            app.app.logger.info(f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
+            return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+        except Exception as err:
+            error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
+            app.app.logger.error(error)
+            raise Exception(error)
 
+    @api.marshal_with(notationModel, skip_none=True)
+    @api.expect(notationModel, validate=True)
     @api.doc("Create notation doc & associated metadata in google sheets")
     def post(self):
         '''
@@ -62,6 +102,8 @@ class Notation(Resource):
     '''
         return "Create notation API"
 
+    @api.marshal_with(notationModel, skip_none=True)
+    @api.expect(notationModel, validate=True)
     @api.doc("Update existing notation doc after being notated")
     def put(self):
         '''
@@ -93,6 +135,8 @@ class Notation(Resource):
         '''
         return "Update notation API"
 
+    @api.marshal_with(notationModel, skip_none=True)
+    @api.expect(notationModel, validate=True)
     @api.doc("Remove notation & its associated metadata")
     def delete(self):
         '''
@@ -106,10 +150,11 @@ class Notation(Resource):
         return "Delete notation API"
 
 
-
 @api.route("/metadata")
 class NotationMetadata(Resource):
     @api.doc("Update notation metadata")
+    @api.expect(notationModel, validate=True)
+    @api.marshal_with(notationModel, skip_none=True)
     def put(self):
         '''
         This is for updating the notation metadata in google sheets only
@@ -122,6 +167,8 @@ class NotationMetadata(Resource):
 @api.route("/search", methods=["POST"])
 class Search(Resource):
     @api.doc("Search across the notation legend google sheets by using filters")
+    @api.expect(notationModel, validate=True)
+    @api.marshal_list_with(notationModel, skip_none=True)
     def post(self):
         '''
         This is for querying the worksheet with query strings for searching across each column
@@ -148,5 +195,3 @@ class Search(Resource):
     :return:
     '''
         return "Search API"
-
-
