@@ -55,17 +55,17 @@ class Notation(Resource):
         docId is a required url parameter
         :return:
         '''
-        api.logger.info("Starting get notation endpoint..")
+        app.app.logger.info("Starting get notation endpoint..")
         args = docIdParser.parse_args()
-        api.logger.info(f"docIdParser args are {args}")
+        app.app.logger.info(f"docIdParser args are {args}")
         docId = args["docId"]
         try:
-            api.logger.info(
+            app.app.logger.info(
                 f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
             return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
             error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
-            api.logger.error(error)
+            app.app.logger.error(error)
 
     @api.marshal_with(notationModel, skip_none=True)
     @api.expect(notationModel, validate=True)
