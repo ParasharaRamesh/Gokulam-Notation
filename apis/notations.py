@@ -39,7 +39,7 @@ notationModel = api.model("Notation", {
                                       description="Boolean field mentioning if review workflow is enabled or not")
 })
 
-docIdParser = api.parser()
+docIdParser = reqparse.RequestParser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
 # all endpoints
