@@ -5,7 +5,6 @@ from core.constants.constants import SHEET_NO
 from core.models.models import Notation
 from core.utils.utils import construct_row_from_notation, construct_notations_from_row, \
     updateNotationWithOnlyFieldsWhichHaveChanged, apply_notation_masks
-from google_client import *
 import app
 
 

@@ -1,11 +1,9 @@
 # contains apis related to drive
 from core.google_connector.docs import create_empty_document
 import app
+from core.utils.utils import sanitizePath
 
 # main methods
-from core.utils import sanitizePath
-
-
 def listAllContents(driveClient):
     '''
     lists all of the file contents along with metadata
