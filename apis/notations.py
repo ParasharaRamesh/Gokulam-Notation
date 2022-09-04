@@ -1,11 +1,12 @@
 from flask_restx import Resource, Namespace, fields, reqparse
+from flask import request
 
 import logging
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
     init_google_sheets_client
-from core.google_connector.sheets import read, delete
+from core.google_connector.sheets import read, delete, update, search
 from core.models.models import Notation
 
 # initializing all of the various google connector clients
@@ -46,32 +47,12 @@ docIdParser.add_argument("docId", help="Google document id present in the google
 @api.route("")
 class Notation(Resource):
     @api.marshal_with(notationModel, skip_none=True)
-    @api.doc("Get notation metadata")
-    @api.expect(docIdParser)
-    def get(self):
-        '''
-        This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
-
-        docId is a required url parameter
-        :return:
-        '''
-        app.app.logger.info("Starting get notation endpoint..")
-        args = docIdParser.parse_args()
-        app.app.logger.info(f"docIdParser args are {args}")
-        docId = args["docId"]
-        try:
-            app.app.logger.info(
-                f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
-            return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
-        except Exception as err:
-            error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
-            app.app.logger.error(error)
-
-    @api.marshal_with(notationModel, skip_none=True)
     @api.expect(docIdParser)
     @api.doc("Remove notation & its associated metadata")
     def delete(self):
         '''
+        TODO. have to delete the google doc also !
+
         This is for deleting a notation row in sheets and its corresponding document from docs
 
         the doc guid can be added as query parameter in the url itself
@@ -88,7 +69,7 @@ class Notation(Resource):
                 f"Attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}")
             return delete(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
-            error = f"Attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}"
+            error = f"Failure when attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}"
             app.app.logger.error(error)
 
     @api.marshal_with(notationModel, skip_none=True)
@@ -177,6 +158,28 @@ class Notation(Resource):
 
 @api.route("/metadata")
 class NotationMetadata(Resource):
+    @api.marshal_with(notationModel, skip_none=True)
+    @api.doc("Get notation metadata")
+    @api.expect(docIdParser)
+    def get(self):
+        '''
+        This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
+
+        docId is a required url parameter
+        :return:
+        '''
+        app.app.logger.info("Starting get notation endpoint..")
+        args = docIdParser.parse_args()
+        app.app.logger.info(f"docIdParser args are {args}")
+        docId = args["docId"]
+        try:
+            app.app.logger.info(
+                f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
+            return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+        except Exception as err:
+            error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
+            app.app.logger.error(error)
+
     @api.doc("Update notation metadata")
     @api.expect(notationModel, validate=True)
     @api.marshal_with(notationModel, skip_none=True)
@@ -186,7 +189,16 @@ class NotationMetadata(Resource):
 
         :return:
         '''
-        return "Update metadata"
+        app.app.logger.info("Starting update notation metadata..")
+        try:
+            data = request.json
+            notation = Notation(**data)
+            app.app.logger.info(
+                f"Attempting to update the notation metadata row present in the legend spreadsheet with notation {notation}")
+            return update(sheetsClient, LEGEND_SPREADSHEET_ID, notation)
+        except Exception as err:
+            error = f"Attempting to update the notation metadata present in the legend spreadsheet with notation {notation}"
+            app.app.logger.error(error)
 
 
 @api.route("/search", methods=["POST"])
@@ -198,25 +210,16 @@ class Search(Resource):
         '''
         This is for querying the worksheet with query strings for searching across each column
 
-    Request body:
-    {
-        "query": {
-            "language": str(can be kannada or english),
-            "lessonName": str,
-            "comments": str, (optional)
-            "raga": str,
-            "arohanam": str,
-            "avarohanam": str,
-            "ragaMetaData": str,
-            "composer": str,
-            "tala": str,
-            "type": str (sarali, jantai, varnams, kritis etc), // if it is of type theory then other fields are optional
-            "notatedBy": str,
-            "reviewedBy" str,
-            "lastModifiedDate": unix timestamp ( no need to pass this as the server will take this and populate this with the current timestamp)
-        }
-    }
-    NOTE: this is the same format as the notation metadata, this should ideally use the google sheets api and return all the rows which have matching constraints along with google doc links
-    :return:
-    '''
+        :return:
+        '''
+        app.app.logger.info("Starting search notation metadata api..")
+        try:
+            data = request.json
+            query = Notation(**data)
+            app.app.logger.info(
+                f"Attempting to search in the legend spreadsheet with query {query}")
+            return search(sheetsClient, LEGEND_SPREADSHEET_ID, query)
+        except Exception as err:
+            error = f"Failure when attempting to search in the legend spreadsheet with query {query}"
+            app.app.logger.error(error)
         return "Search API"
