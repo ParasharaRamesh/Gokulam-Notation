@@ -111,6 +111,11 @@ class Notation(Resource):
 class NotationMetadata(Resource):
     @api.doc("Update notation metadata")
     def put(self):
+        '''
+        This is for updating the notation metadata in google sheets only
+
+        :return:
+        '''
         return "Update metadata"
 
 
