@@ -45,6 +45,7 @@ docIdParser.add_argument("docId", help="Google document id present in the google
 class Notation(Resource):
     @api.marshal_with(notationModel, skip_none=True)
     @api.doc("Get notation metadata")
+    @api.expect(docIdParser)
     def get(self):
         '''
         This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
