@@ -33,8 +33,7 @@ notationModel = api.model("Notation", {
     "notatedBy": fields.String(required=False, description="Name of the person who has contributed"),
     "reviewedBy": fields.String(required=False,
                                 description="Name of the person who has reviewed it (can be the same as the contributor)"),
-    "lastModified": fields.String(required=False, readonly=True,
-                                  description="String representation of the current timestamp. "),
+    "lastModified": fields.String(required=False, description="String representation of the current timestamp. "),
     "workflowEnabled": fields.Boolean(required=False,
                                       description="Boolean field mentioning if review workflow is enabled or not")
 })
@@ -194,6 +193,9 @@ class NotationMetadataController(Resource):
             data = request.json
             app.app.logger.info(f"request is {data}")
             notation = Notation(**data)
+            # last modified needs to be explicity present in request data for it to be filtered
+            if "lastModified" not in data:
+                notation.lastModified = None
             app.app.logger.info(
                 f"Attempting to update the notation metadata row present in the legend spreadsheet with notation {notation}")
             return update(sheetsClient, LEGEND_SPREADSHEET_ID, notation)
@@ -218,6 +220,9 @@ class SearchController(Resource):
             data = request.json
             app.app.logger.info(f"request is {data}")
             query = Notation(**data)
+            # last modified needs to be explicity present in request data for it to be filtered
+            if "lastModified" not in data:
+                query.lastModified = None
             app.app.logger.info(
                 f"Attempting to search in the legend spreadsheet with query {query}")
             return search(sheetsClient, LEGEND_SPREADSHEET_ID, query)
