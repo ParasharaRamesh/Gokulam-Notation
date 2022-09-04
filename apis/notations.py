@@ -5,7 +5,7 @@ import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
     init_google_sheets_client
-from core.google_connector.sheets import read
+from core.google_connector.sheets import read, delete
 from core.models.models import Notation
 
 # initializing all of the various google connector clients
@@ -65,6 +65,30 @@ class Notation(Resource):
             return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
             error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
+            app.app.logger.error(error)
+
+    @api.marshal_with(notationModel, skip_none=True)
+    @api.expect(docIdParser)
+    @api.doc("Remove notation & its associated metadata")
+    def delete(self):
+        '''
+        This is for deleting a notation row in sheets and its corresponding document from docs
+
+        the doc guid can be added as query parameter in the url itself
+
+        this should delete the row in the google sheets and also remove the notation file from the google drive location
+        :return:
+        '''
+        app.app.logger.info("Starting delete notation endpoint..")
+        args = docIdParser.parse_args()
+        app.app.logger.info(f"docIdParser args are {args}")
+        docId = args["docId"]
+        try:
+            app.app.logger.info(
+                f"Attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}")
+            return delete(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+        except Exception as err:
+            error = f"Attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}"
             app.app.logger.error(error)
 
     @api.marshal_with(notationModel, skip_none=True)
@@ -149,20 +173,6 @@ class Notation(Resource):
 
         '''
         return "Update notation API"
-
-    @api.marshal_with(notationModel, skip_none=True)
-    @api.expect(notationModel, validate=True)
-    @api.doc("Remove notation & its associated metadata")
-    def delete(self):
-        '''
-        This is for deleting a notation row in sheets and its corresponding document from docs
-
-        the doc guid can be added as query parameter in the url itself
-
-        this should delete the row in the google sheets and also remove the notation file from the google drive location
-        :return:
-        '''
-        return "Delete notation API"
 
 
 @api.route("/metadata")
