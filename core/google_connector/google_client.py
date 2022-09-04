@@ -50,18 +50,18 @@ def init_google_drive_client(useLocalCreds=False):
         app.app.logger.info(err)
         raise Exception(f"Unable to initialize google drive client. Exception is {err}")
 
-
-def init_google_sheets_client(useLocalCreds=False):
-    try:
-        creds = getCredentials(useLocalCreds)
-        sheets_client = build('sheets', 'v4', credentials=creds)
-        return sheets_client
-    except Exception as err:
-        app.app.logger.info(err)
-        raise Exception(f"Unable to initialize google sheets client. Exception is {err}")
+# Uncomment this if you want to use the OG google sheets client instead
+# def init_google_sheets_client(useLocalCreds=False):
+#     try:
+#         creds = getCredentials(useLocalCreds)
+#         sheets_client = build('sheets', 'v4', credentials=creds)
+#         return sheets_client
+#     except Exception as err:
+#         app.app.logger.info(err)
+#         raise Exception(f"Unable to initialize google sheets client. Exception is {err}")
 
 #this is another client for google sheets which has an easier to work with API interface
-def init_google_sheets_client_using_pygsheets(useLocalCreds=False):
+def init_google_sheets_client(useLocalCreds=False):
     try:
         creds = getCredentials(useLocalCreds)
         sheets_client = pygsheets.authorize(custom_credentials=creds, scopes=SCOPES)

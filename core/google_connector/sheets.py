@@ -1,27 +1,31 @@
 # Contains apis related to google sheets
+from typing import List
+
 from core.constants.constants import SHEET_NO
+from core.models.models import Notation
+from core.utils.utils import construct_row_from_notation, construct_notations_from_row, \
+    updateNotationWithOnlyFieldsWhichHaveChanged, apply_notation_masks
 from google_client import *
 import app
 
-#TODO integrate with the models themselves and create classes for everything for consistency sake!
 
 # main methods
-def append(sheetsClient, spreadSheetId, notationMetaData):
+def append(sheetsClient, spreadSheetId, notation: Notation):
     '''
     should append the notationMetaData as a row
 
     :param sheetsClient:
     :param spreadSheetId:
-    :param notationMetaData: list of values in the order mentioned in the google sheets
+    :param notation: list of values in the order mentioned in the google sheets
     :return:
     '''
     try:
         app.app.logger.info(
-            f"Attempting to append metadata {notationMetaData} into spread sheet with id {spreadSheetId}")
+            f"Attempting to append metadata {notation} into spread sheet with id {spreadSheetId}")
         rowIndex = len(get_data(sheetsClient, spreadSheetId))
-        return insert_row(sheetsClient, spreadSheetId, rowIndex=rowIndex, row=notationMetaData)
+        return insert_row(sheetsClient, spreadSheetId, rowIndex=rowIndex, row=notation)
     except Exception as err:
-        error = f"Error while attempting to append metadata {notationMetaData} into spread sheet with id {spreadSheetId}. Error is {err}"
+        error = f"Error while attempting to append metadata {notation} into spread sheet with id {spreadSheetId}. Error is {err}"
         app.app.logger.error(error)
         raise Exception(error)
 
@@ -35,7 +39,18 @@ def read(sheetsClient, spreadSheetId, docId):
     :param docId:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
+        data = get_data_as_dataframe(sheetsClient, spreadSheetId)
+        mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
+        row = data[mask]
+        row = row.reset_index().to_dict("list")
+        return row
+    except Exception as err:
+        error = f"Error while attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
 
 def delete(sheetsClient, spreadSheetId, docId):
@@ -47,10 +62,22 @@ def delete(sheetsClient, spreadSheetId, docId):
     :param docId:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
+        data = get_data_as_dataframe(sheetsClient, spreadSheetId)
+        mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
+        row = data[mask]
+        # plus 2 because the header is not accounted & it is 1 based indexing
+        rowIndex = row.reset_index().to_dict("list")["index"][0] + 2
+        return delete_row(sheetsClient, spreadSheetId, rowIndex)
+    except Exception as err:
+        error = f"Error while attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
 
-def update(sheetsClient, spreadSheetId, notationMetaData):
+def update(sheetsClient, spreadSheetId, newNotation: Notation):
     '''
     should update the notation meta data with the new value.
 
@@ -61,10 +88,25 @@ def update(sheetsClient, spreadSheetId, notationMetaData):
     :param notationMetaData:
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
+        data = get_data_as_dataframe(sheetsClient, spreadSheetId)
+        mask = data["Google Doc Id"].str.contains(newNotation.docId, case=True, na=False)
+        row = data[mask].reset_index().to_dict("list")
+        # plus 2 because the header is not accounted & it is 1 based indexing
+        rowIndex = row["index"][0] + 2
+        existingNotation = construct_notations_from_row(row)[0]
+        updatedNotation = updateNotationWithOnlyFieldsWhichHaveChanged(existingNotation, newNotation)
+        notationRow = construct_row_from_notation(updatedNotation)
+        return update_row(sheetsClient, spreadSheetId, rowIndex, notationRow)
+    except Exception as err:
+        error = f"Error while attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
 
-def search(sheetsClient, spreadSheetId, query):
+def search(sheetsClient, spreadSheetId, query: Notation) -> List[Notation]:
     '''
     Given a search query it returns all the rows which match that criteria.
     Implement a really simple search logic ( perhaps convert to dataframe and use pandas)
@@ -72,9 +114,19 @@ def search(sheetsClient, spreadSheetId, query):
     :param sheetsClient:
     :param spreadSheetId:
     :param query:
-    :return:
+    :return: list of notation objects
     '''
-    pass
+    try:
+        app.app.logger.info(
+            f"Attempting to search for notations matching query {query} from spreadSheet with id {spreadSheetId}")
+        data = get_data_as_dataframe(sheetsClient, spreadSheetId)
+        filteredData = apply_notation_masks(data, query)
+        searchResults = filteredData.reset_index().to_dict("list")
+        return construct_notations_from_row(searchResults)
+    except Exception as err:
+        error = f"Error while attempting to search for notations matching query {query} from spreadSheet with id {spreadSheetId}. Error is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
 
 
 # helper methods
@@ -323,10 +375,3 @@ def set_data_as_dataframe(sheetsClient, spreadSheetId, df):
         error = f"Error while attempting to get the entire data present in spreadSheet id {spreadSheetId}. Error is {err}"
         app.app.logger.error(error)
         raise Exception(error)
-
-
-if __name__ == "__main__":
-    # The ID and range of a sample spreadsheet.
-    SPREADSHEET_ID = '14CJ1ftp9MCni4kxHpSnpIg9eyp9VTldO0vzBHLVWtG0'
-    sheetsClient = init_google_sheets_client_using_pygsheets(True)
-    append(sheetsClient,SPREADSHEET_ID,["p","a","r"])
