@@ -61,7 +61,6 @@ class Notation(Resource):
         except Exception as err:
             error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
             app.app.logger.error(error)
-            raise Exception(error)
 
     @api.marshal_with(notationModel, skip_none=True)
     @api.expect(notationModel, validate=True)
