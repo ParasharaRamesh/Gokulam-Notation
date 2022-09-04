@@ -53,9 +53,9 @@ class Notation(Resource):
         docId is a required url parameter
         :return:
         '''
+        args = docIdParser.parse_args()
+        docId = args["docId"]
         try:
-            args = docIdParser.parse_args()
-            docId = args["docId"]
             app.app.logger.info(f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
             return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
