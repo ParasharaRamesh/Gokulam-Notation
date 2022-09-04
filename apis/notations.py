@@ -41,7 +41,7 @@ docIdParser = api.parser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
 #all endpoints
-@api.route("/")
+@api.route("")
 class Notation(Resource):
     @api.marshal_with(notationModel, skip_none=True)
     @api.doc("Get notation metadata")
