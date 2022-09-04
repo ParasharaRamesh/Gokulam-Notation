@@ -1,7 +1,6 @@
 from flask_restx import Resource, Namespace, fields, reqparse
 from flask import request
 
-import logging
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
@@ -43,9 +42,10 @@ notationModel = api.model("Notation", {
 docIdParser = reqparse.RequestParser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
+
 # all endpoints
 @api.route("")
-class Notation(Resource):
+class NotationController(Resource):
     @api.marshal_with(notationModel, skip_none=True)
     @api.expect(docIdParser)
     @api.doc("Remove notation & its associated metadata")
@@ -157,7 +157,7 @@ class Notation(Resource):
 
 
 @api.route("/metadata")
-class NotationMetadata(Resource):
+class NotationMetadataController(Resource):
     @api.marshal_with(notationModel, skip_none=True)
     @api.doc("Get notation metadata")
     @api.expect(docIdParser)
@@ -192,6 +192,7 @@ class NotationMetadata(Resource):
         app.app.logger.info("Starting update notation metadata..")
         try:
             data = request.json
+            app.app.logger.info(f"request is {data}")
             notation = Notation(**data)
             app.app.logger.info(
                 f"Attempting to update the notation metadata row present in the legend spreadsheet with notation {notation}")
@@ -202,7 +203,7 @@ class NotationMetadata(Resource):
 
 
 @api.route("/search", methods=["POST"])
-class Search(Resource):
+class SearchController(Resource):
     @api.doc("Search across the notation legend google sheets by using filters")
     @api.expect(notationModel, validate=True)
     @api.marshal_list_with(notationModel, skip_none=True)
@@ -215,6 +216,7 @@ class Search(Resource):
         app.app.logger.info("Starting search notation metadata api..")
         try:
             data = request.json
+            app.app.logger.info(f"request is {data}")
             query = Notation(**data)
             app.app.logger.info(
                 f"Attempting to search in the legend spreadsheet with query {query}")
