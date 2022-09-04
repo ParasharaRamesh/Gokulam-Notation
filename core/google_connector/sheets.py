@@ -88,7 +88,7 @@ def update(sheetsClient, spreadSheetId, newNotation: Notation):
     '''
     try:
         app.app.logger.info(
-            f"Attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
+            f"Attempting to update metadata from spreadSheet with id {spreadSheetId} with new row {newNotation}")
         data = get_data_as_dataframe(sheetsClient, spreadSheetId)
         mask = data["Google Doc Id"].str.contains(newNotation.docId, case=True, na=False)
         row = data[mask].reset_index().to_dict("list")
@@ -99,7 +99,7 @@ def update(sheetsClient, spreadSheetId, newNotation: Notation):
         notationRow = construct_row_from_notation(updatedNotation)
         return update_row(sheetsClient, spreadSheetId, rowIndex, notationRow)
     except Exception as err:
-        error = f"Error while attempting to delete metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
+        error = f"Error while attempting to update metadata from spreadSheet with id {spreadSheetId} with new row {newNotation}. Error is {err}"
         app.app.logger.error(error)
         raise Exception(error)
 
@@ -313,7 +313,7 @@ def get_entire_data(sheetsClient, spreadSheetId):
     '''
     try:
         app.app.logger.info(f"Attempting to get the entire metadata & data present in spreadSheet id {spreadSheetId}")
-        return sheetsClient.sheet.get(SPREADSHEET_ID)
+        return sheetsClient.sheet.get(spreadSheetId)
     except Exception as err:
         error = f"Error while attempting to get the entire metadata & data present in spreadSheet id {spreadSheetId}. Error is {err}"
         app.app.logger.error(error)
