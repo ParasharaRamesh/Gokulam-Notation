@@ -34,13 +34,15 @@ notationModel = api.model("Notation", {
                                 description="Name of the person who has reviewed it (can be the same as the contributor)"),
     "lastModified": fields.String(required=False, readonly=True,
                                   description="String representation of the current timestamp. "),
-    "workflowEnabled": fields.Boolean(required=False, description="Boolean field mentioning if review workflow is enabled or not")
+    "workflowEnabled": fields.Boolean(required=False,
+                                      description="Boolean field mentioning if review workflow is enabled or not")
 })
 
 docIdParser = api.parser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
-#all endpoints
+
+# all endpoints
 @api.route("")
 class Notation(Resource):
     @api.marshal_with(notationModel, skip_none=True)
@@ -53,10 +55,13 @@ class Notation(Resource):
         docId is a required url parameter
         :return:
         '''
+        app.app.logger("Starting get notation endpoint..")
         args = docIdParser.parse_args()
+        app.app.logger.info(f"docIdParser args are {args}")
         docId = args["docId"]
         try:
-            app.app.logger.info(f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
+            app.app.logger.info(
+                f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
             return read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
         except Exception as err:
             error = f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}"
