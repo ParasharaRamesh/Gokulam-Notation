@@ -20,7 +20,8 @@ class Notation:
                  ragaMetaData=None,
                  notatedBy=None,
                  reviewedBy=None,
-                 lastModified=str(datetime.now(tz=gettz('Asia/Kolkata')))):
+                 lastModified=str(datetime.now(tz=gettz('Asia/Kolkata'))),
+                 workflowEnabled=False):
         self.name = name
         self.language = language
         self.docLink = docLink
@@ -36,9 +37,10 @@ class Notation:
         self.notatedBy = notatedBy
         self.reviewedBy = reviewedBy
         self.lastModified = lastModified
+        self.workflowEnabled = workflowEnabled
 
     def __str__(self):
-        return f"Notation(name={self.name},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified}"
+        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified}"
 
     def __repr__(self):
-        return f"Notation(name={self.name},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified}"
+        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified}"

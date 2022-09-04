@@ -26,7 +26,8 @@ notationModel = api.model("Notation", {
     "reviewedBy": fields.String(required=False,
                                 description="Name of the person who has reviewed it (can be the same as the contributor)"),
     "lastModified": fields.String(required=False, readonly=True,
-                                  description="String representation of the current timestamp. ")
+                                  description="String representation of the current timestamp. "),
+    "workflowEnabled": fields.Boolean(required=False, description="Boolean field mentioning if review workflow is enabled or not")
 })
 
 docIdParser = api.parser()
@@ -40,6 +41,7 @@ class Notation(Resource):
         '''
         This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
 
+        docId is a required url parameter
         :return:
         '''
         try:
