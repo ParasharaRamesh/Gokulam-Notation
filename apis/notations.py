@@ -1,11 +1,18 @@
 from flask_restx import Resource, Namespace, fields, reqparse
 
 import app
-from app import driveClient, docsClient, sheetsClient
 from core.constants.constants import LEGEND_SPREADSHEET_ID
+from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
+    init_google_sheets_client
 from core.google_connector.sheets import read
 from core.models.models import Notation
 
+# initializing all of the various google connector clients
+docsClient = init_google_docs_client()
+driveClient = init_google_drive_client()
+sheetsClient = init_google_sheets_client()
+
+# defining all models and parsers
 api = Namespace("notations", description="All endpoints related to notations")
 
 notationModel = api.model("Notation", {
@@ -33,6 +40,7 @@ notationModel = api.model("Notation", {
 docIdParser = api.parser()
 docIdParser.add_argument("docId", help="Google document id present in the google sheets row", required=True)
 
+#all endpoints
 @api.route("/")
 class Notation(Resource):
     @api.marshal_with(notationModel, skip_none=True)
