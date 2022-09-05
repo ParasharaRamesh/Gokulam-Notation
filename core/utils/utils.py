@@ -36,7 +36,8 @@ def construct_row_from_notation(notation: Notation):
         notation.docLink,
         notation.notatedBy,
         notation.reviewedBy,
-        notation.lastModified
+        notation.lastModified,
+        notation.status
     ]
 
 
@@ -54,7 +55,8 @@ def construct_notations_from_row(row) -> List[Notation]:
             docLink=row["Google Doc Link"][i],
             notatedBy=row["Notated By"][i],
             reviewedBy=row["Reviewed By"][i],
-            lastModified=row["Last Modified Date"][i]
+            lastModified=row["Last Modified Date"][i],
+            status=row["Status"][i]
         ))
     return notations
 
@@ -89,6 +91,9 @@ def updateNotationWithOnlyFieldsWhichHaveChanged(existingNotation: Notation, new
 
     if not isStringEmpty(newNotation.lastModified) and existingNotation.lastModified != newNotation.lastModified:
         existingNotation.lastModified = newNotation.lastModified
+
+    if not isStringEmpty(newNotation.status) and existingNotation.status != newNotation.status:
+        existingNotation.status = newNotation.status
 
     return existingNotation
 
@@ -146,6 +151,11 @@ def apply_notation_masks(data, query: Notation):
     if not isStringEmpty(query.lastModified):
         app.app.logger.info("Last modified column is being filtered..")
         mask = data["Last Modified Date"].str.contains(query.lastModified, case=False, na=False)
+        data = data[mask]
+
+    if not isStringEmpty(query.status):
+        app.app.logger.info("Status column is being filtered..")
+        mask = data["Status"].str.contains(query.status, case=False, na=False)
         data = data[mask]
 
     return data

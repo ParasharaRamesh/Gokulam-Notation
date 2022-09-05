@@ -9,6 +9,11 @@ SHEET_NO = 'Sheet1'
 
 LEGEND_SPREADSHEET_ID = os.environ['LEGEND_SPREADSHEET_ID']
 
+class STATUS(Enum):
+    IN_PROGRESS = "IN PROGRESS"
+    COMPLETED = "COMPLETED"
+    TO_BE_REVIEWED = "TO BE REVIEWED"
+
 class LANGUAGES(Enum):
     ENGLISH = "english"
     KANNADA = "kannada"

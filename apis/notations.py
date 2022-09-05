@@ -3,6 +3,7 @@ from flask import request
 
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID
+from core.google_connector.drive import delete_node
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
     init_google_sheets_client
 from core.google_connector.sheets import read, delete, update, search
@@ -29,6 +30,7 @@ notationModel = api.model("Notation", {
     "arohanam": fields.String(required=False, description="Arohanam of the raga"),
     "avarohanam": fields.String(required=False, description="Avaraohanam of the raga"),
     "comments": fields.String(required=False, description="Optional comments"),
+    "status": fields.String(required=False, description="Status, can take the values (IN PROGRESS, COMPLETED, TO BE REVIEWED)"),
     "ragaMetaData": fields.String(required=False,
                                   description="Additional meta data for raga. e.g. Janyam of 29th melakarta"),
     "notatedBy": fields.String(required=False, description="Name of the person who has contributed"),
@@ -46,30 +48,28 @@ docIdParser.add_argument("docId", help="Google document id present in the google
 # all endpoints
 @api.route("")
 class NotationController(Resource):
-    @api.marshal_with(notationModel, skip_none=True)
     @api.expect(docIdParser)
-    @api.doc("Remove notation & its associated metadata")
+    @api.doc("Remove notation doc & its associated metadata in google sheets")
     def delete(self):
         '''
-        TODO. have to delete the google doc also !
-
         This is for deleting a notation row in sheets and its corresponding document from docs
 
         the doc guid can be added as query parameter in the url itself
 
-        this should delete the row in the google sheets and also remove the notation file from the google drive location
+        this should delete the row in the google sheets and also remove the notation file from the google drive location. This will however not remove the path of folders
         :return:
         '''
         app.app.logger.info("Starting delete notation endpoint..")
         args = docIdParser.parse_args()
-        app.app.logger.info(f"docIdParser args are {args}")
         docId = args["docId"]
         try:
-            app.app.logger.info(
-                f"Attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}")
-            return delete(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+            app.app.logger.info(f"Now attempting to delete the doc with {docId} ")
+            delete_node(driveClient, docId)
+            app.app.logger.info(f"Successfully deleted the google doc with id {docId}. Now attempting to delete the notation row present in the legend spreadsheet")
+            delete(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+            app.app.logger.info(f"Successfully deleted the row with the doc id {docId} in the legend spreadsheet!!")
         except Exception as err:
-            error = f"Failure when attempting to delete the notation row present in the legend spreadsheet for row with doc id {docId}"
+            error = f"Failure when attempting to delete the notation with doc id {docId}"
             app.app.logger.error(error)
 
     @api.marshal_with(notationModel, skip_none=True)
@@ -170,7 +170,6 @@ class NotationMetadataController(Resource):
         '''
         app.app.logger.info("Starting get notation endpoint..")
         args = docIdParser.parse_args()
-        app.app.logger.info(f"docIdParser args are {args}")
         docId = args["docId"]
         try:
             app.app.logger.info(
