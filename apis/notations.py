@@ -57,6 +57,8 @@ class NotationController(Resource):
         the doc guid can be added as query parameter in the url itself
 
         this should delete the row in the google sheets and also remove the notation file from the google drive location. This will however not remove the path of folders
+
+        Note: only docs created from the apis here using the service account can be deleted. Files created manually cannot be deleted as the service account wont be the owner of that file!
         :return:
         '''
         app.app.logger.info("Starting delete notation endpoint..")
