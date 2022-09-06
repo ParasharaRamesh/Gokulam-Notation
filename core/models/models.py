@@ -3,6 +3,7 @@ from core.constants.constants import LANGUAGES
 from datetime import datetime
 from dateutil.tz import gettz
 
+
 class Notation:
     def __init__(self,
                  name=None,
@@ -24,7 +25,7 @@ class Notation:
                  pointsToNote=None,
                  references=None,
                  lastModified=str(datetime.now(tz=gettz('Asia/Kolkata'))),
-                 workflowEnabled=False):
+                 workflowEnabled: bool = False):
         self.name = name
         self.language = language
         self.docLink = docLink
