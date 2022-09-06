@@ -203,8 +203,8 @@ class NotationMetadataController(Resource):
             notationRow = read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
             app.app.logger.info(
                 f"retrieved row {notationRow} for the document which has to be approved!. Now moving to actual location")
-            oldPathFromRow = f"{NOTATION_REVIEW_FOLDER}/{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.name}"
-            newApprovedPath = f"{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.name}"
+            oldPathFromRow = f"{NOTATION_REVIEW_FOLDER}/{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.tala}/{notationRow.name}"
+            newApprovedPath = f"{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.tala}/{notationRow.name}"
             move_file(docsClient, driveClient, PARENT_DRIVE_ID, oldPath=oldPathFromRow, newPath=newApprovedPath)
             app.app.logger.info(
                 f"moved the document from {oldPathFromRow} to {newApprovedPath}. Now changing metadata with status as COMPLETED")
