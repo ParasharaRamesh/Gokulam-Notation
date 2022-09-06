@@ -78,12 +78,13 @@ def create_drive_node(docsClient, driveClient, parentId, relativePathFromParentF
         raise Exception(error)
 
 
-def move_file(driveClient, parentId, oldPath, newPath):
+def move_file(docsClient, driveClient, parentId, oldPath, newPath):
     '''
     Move file from oldPath to newPath
 
     NOTE: the leaf node name needs to be the same
 
+    :param docsClient:
     :param driveClient:
     :param parentId:
     :param oldPath: 1/2/3/4.gokulam
@@ -97,6 +98,11 @@ def move_file(driveClient, parentId, oldPath, newPath):
 
         # gets the name of the new parent folder under which the file has to go into
         newParentFolderPath = "/".join(newPath.split("/")[:-1])
+        #create the new path's parent folder if it doesnt exist yet!
+        app.app.logger.info(f"Attempting to create a folder node in path {newParentFolderPath}. If it already exists this wont do anything!")
+        create_drive_node(docsClient, driveClient, parentId, newParentFolderPath)
+        app.app.logger.info(
+            f"Folder node in path {newParentFolderPath} now exists!")
         newParentNode = get_node_from_path(driveClient, parentId, newParentFolderPath)
         app.app.logger.info(
             f"The node from the new parent folder path {newParentFolderPath} is {newParentNode}. Now attempting to move the node!")
