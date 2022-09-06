@@ -36,9 +36,9 @@ notationModel = api.model("Notation", {
                             description="Status, can take the values (IN PROGRESS, COMPLETED, TO BE REVIEWED)"),
     "ragaMetaData": fields.String(required=False,
                                   description="Additional meta data for raga. e.g. Janyam of 29th melakarta"),
-    "notatedBy": fields.String(required=False, description="Name of the person who has contributed"),
+    "notatedBy": fields.String(required=False, description="Name of the person who has contributed, has to be an email id"),
     "reviewedBy": fields.String(required=False,
-                                description="Name of the person who has reviewed it (can be the same as the contributor)"),
+                                description="Name of the person who has reviewed it (can be the same as the contributor), has to be an email id"),
     "lastModified": fields.String(required=False, description="String representation of the current timestamp. "),
     "workflowEnabled": fields.Boolean(required=False,
                                       description="Boolean field mentioning if review workflow is enabled or not")
@@ -51,6 +51,22 @@ docIdParser.add_argument("docId", help="Google document id present in the google
 # all endpoints
 @api.route("")
 class NotationController(Resource):
+    @api.expect(docIdParser)
+    @api.doc("Get the contents of the google doc as is")
+    def get(self):
+        '''
+        TODO
+
+        Given doc id it gets the contents of the file as is.
+
+        NOTE: given then new markup & templating logic for a file it will be hard to reshow this file in the UI.
+
+        Perhaps alternatively, any file that is created can be shared with the gmail user who is notating it so that it becomes easy to edit in google docs itself!
+
+        :return:
+        '''
+        pass
+
     @api.expect(docIdParser)
     @api.doc("Remove notation doc & its associated metadata in google sheets")
     def delete(self):
@@ -89,6 +105,8 @@ class NotationController(Resource):
         '''
         This endpoint is for creating a notation row in the google sheets and creating an empty doc in google docs at the specified location
 
+        The status becomes IN PROGRESS after this
+
         :return: message string
         '''
         app.app.logger.info("Starting create notation endpoint..")
@@ -125,31 +143,13 @@ class NotationController(Resource):
     @api.doc("Update existing notation doc after being notated")
     def put(self):
         '''
+        TODO
+
         This is for writing the notation into the notation doc
 
-        The request data should have the following information
-        {
-            "metaData": {
-                "lastModifiedDate": str( this need not be provided in the request body as the server will populate this automatically),
-                "docGuid": str
-            },
-            "notations": {
-                "text": str // this is something which requires lots of trial & error,there are google docs which can render color and do formatting,
-                have to come up with a custom markdown language which is converted in the backend into the appropriate google docs api
-            },
-            "workflowEnabled": false (if true it would have to look at the "to be reviewed" folder and then put it into the main folder path)k
-        }
+        NOTE: In case there are any edits to the file, it is very hard to edit it in place. Therefore, it is better to get the notation and then delete it and then recreate it with the correct content!
 
-        :return:
-        {
-            "notatedBy": str,
-            "lastModified": unix timestamp ( milliseconds from 1970 jan 1)
-            "docGuid": str,
-            "docLink": str,
-            "status": str (SUCCESS | FAIL)
-            "message": str (if the status is FAIL it contains the error message as is)
-        }
-
+        The status becomes COMPLETED or TO BE REVIEWED based on whether the workflow is active or not
         '''
         app.app.logger.info("Starting write notation endpoint..")
         data = request.json
@@ -165,6 +165,22 @@ class NotationController(Resource):
             app.app.logger.error(error)
             return abort(message=error)
 
+
+@api.route("/workflow")
+class NotationMetadataController(Resource):
+    @api.doc("Move created document from the to be reviewed folder to the actual folder after reviews are completed!")
+    @api.expect(docIdParser)
+    def get(self):
+        '''
+        TODO.
+
+        Given docId, it gets the metadata from the google sheets and uses the to be reviewed location derived from the rows to put it into another folder
+
+        The status becomes COMPLETED after this.
+
+        :return:
+        '''
+        pass
 
 @api.route("/metadata")
 class NotationMetadataController(Resource):
