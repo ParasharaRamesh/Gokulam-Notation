@@ -42,6 +42,8 @@ notationModel = api.model("Notation", {
     "reviewedBy": fields.String(required=False,
                                 description="Name of the person who has reviewed it (can be the same as the contributor), has to be an email id"),
     "lastModified": fields.String(required=False, description="String representation of the current timestamp. "),
+    "pointsToNote": fields.String(required=False, description="Fills the points to note section of the document"),
+    "references": fields.String(required=False, description="Fills the references section of the document"),
     "workflowEnabled": fields.Boolean(required=False,
                                       description="Boolean field mentioning if review workflow is enabled or not")
 })
@@ -91,7 +93,9 @@ class NotationController(Resource):
         '''
         This endpoint is for creating a notation row in the google sheets and creating an empty doc in google docs at the specified location
 
-        The status becomes IN PROGRESS after this
+        The status becomes IN PROGRESS after this.
+
+        NOTE: this does not fill anything in the document at this point. Therefore only fill the fields which are present in the spreadsheet.
 
         :return: message string
         '''

@@ -21,6 +21,8 @@ class Notation:
                  notatedBy=None,
                  reviewedBy=None,
                  status=None,
+                 pointsToNote=None,
+                 references=None,
                  lastModified=str(datetime.now(tz=gettz('Asia/Kolkata'))),
                  workflowEnabled=False):
         self.name = name
@@ -41,9 +43,23 @@ class Notation:
         self.lastModified = lastModified
         self.workflowEnabled = workflowEnabled
         self.status = status
+        self.pointsToNote = pointsToNote
+        self.references = references
 
     def __str__(self):
-        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name},notation={self.notation},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified},status={self.status}"
+        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name}," \
+               f"notation={self.notation},language={self.language},docLink={self.docLink}," \
+               f"docId={self.docId},type={self.type},raga={self.raga},tala={self.tala}," \
+               f"composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam}," \
+               f"comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy}," \
+               f"reviewedBy={self.reviewedBy},lastModified={self.lastModified},status={self.status}," \
+               f"pointsToNote={self.pointsToNote},references={self.references}"
 
     def __repr__(self):
-        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name},notation={self.notation},language={self.language},docLink={self.docLink},docId={self.docId},type={self.type},raga={self.raga},tala={self.tala},composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam},comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy},reviewedBy={self.reviewedBy},lastModified={self.lastModified},status={self.status}"
+        return f"Notation(workflowEnabled={self.workflowEnabled},name={self.name}," \
+               f"notation={self.notation},language={self.language},docLink={self.docLink}," \
+               f"docId={self.docId},type={self.type},raga={self.raga},tala={self.tala}," \
+               f"composer={self.composer},arohanam={self.arohanam},avarohanam={self.avarohanam}," \
+               f"comments={self.comments},ragaMetaData={self.ragaMetaData},notatedBy={self.notatedBy}," \
+               f"reviewedBy={self.reviewedBy},lastModified={self.lastModified},status={self.status}," \
+               f"pointsToNote={self.pointsToNote},references={self.references}"
