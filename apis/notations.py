@@ -188,9 +188,9 @@ class NotationMetadataController(Resource):
     @api.expect(docIdParser)
     def get(self):
         '''
-        Given docId, it gets the metadata from the google sheets and uses the to be reviewed location derived from the rows to put it into another folder
+        Given docId which is under review (i.e. if the workflow approval is active), it gets the metadata from the google sheets and uses the to be reviewed location derived from the rows to put it into another folder
 
-        The status becomes COMPLETED after this.
+        The status becomes COMPLETED after this from TO BE REVIEWED.
 
         :return:
         '''
