@@ -22,7 +22,7 @@ def append(sheetsClient, spreadSheetId, notation: Notation):
         app.app.logger.info(
             f"Attempting to append metadata {notation} into spread sheet with id {spreadSheetId}")
         rowIndex = len(get_data(sheetsClient, spreadSheetId))
-        return insert_row(sheetsClient, spreadSheetId, rowIndex=rowIndex, row=notation)
+        return insert_row(sheetsClient, spreadSheetId, rowIndex=rowIndex, notation=notation)
     except Exception as err:
         error = f"Error while attempting to append metadata {notation} into spread sheet with id {spreadSheetId}. Error is {err}"
         app.app.logger.error(error)
@@ -147,22 +147,24 @@ def construct_worksheet_client(sheetsClient, spreadSheetId):
         raise Exception(error)
 
 
-def insert_row(sheetsClient, spreadSheetId, rowIndex, row):
+def insert_row(sheetsClient, spreadSheetId, rowIndex, notation: Notation):
     '''
 
     :param sheetsClient:
     :param spreadSheetId:
     :param rowIndex: 0 based indexing
-    :param row: list of values
+    :param notation: Notation object
     :return:
     '''
     try:
         app.app.logger.info(
-            f"Attempting to insert row {row} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}")
+            f"Attempting to insert row {notation} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}")
         worksheetClient = construct_worksheet_client(sheetsClient, spreadSheetId)
+        row = construct_row_from_notation(notation)
+        app.app.logger.info(f"Appending the row {row}")
         return worksheetClient.insert_rows(rowIndex, values=row)
     except Exception as err:
-        error = f"Error while attempting to insert row {row} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}. Error is {err}"
+        error = f"Error while attempting to insert row {notation} into spread sheet with id {spreadSheetId} @ the index(0 based) rowIndex {rowIndex}. Error is {err}"
         app.app.logger.error(error)
         raise Exception(error)
 
