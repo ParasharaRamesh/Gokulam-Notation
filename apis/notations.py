@@ -103,7 +103,7 @@ class NotationController(Resource):
             pathToCreateTemplateFile = f"{notation.language}/{notation.type}/{notation.raga}/{notation.tala}/{notation.name}"
             if notation.workflowEnabled:
                 # if workflow is enabled it has to be created here!
-                pathToCreateTemplateFile = f"NOTATION_REVIEW_FOLDER/{pathToCreateTemplateFile}"
+                pathToCreateTemplateFile = f"{NOTATION_REVIEW_FOLDER}/{pathToCreateTemplateFile}"
 
             app.app.logger.info(f"Attempting to create a template notation file at the path {pathToCreateTemplateFile}")
             docId = create_drive_node(docsClient, driveClient, PARENT_DRIVE_ID, pathToCreateTemplateFile, True, True,

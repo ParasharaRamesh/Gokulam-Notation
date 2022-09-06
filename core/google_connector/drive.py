@@ -55,12 +55,13 @@ def create_drive_node(docsClient, driveClient, parentId, relativePathFromParentF
                     newNode = create_node(driveClient, newNodeMetaData)
                     nodeId = newNode["id"]
                 elif not isLeafNodeAFile:
-                    app.app.logger.info(f"folder name {component} does not exist! Creating {component} & returning")
+                    app.app.logger.info(f"leaf folder name {component} does not exist! Creating {component} & returning")
                     # create folder and cd
                     newNodeMetaData = construct_node_metaData(nodeId, component)
                     newNode = create_node(driveClient, newNodeMetaData)
                     return newNode["id"]
                 else:
+                    app.app.logger.info(f"leaf file name {component} does not exist! Creating it!!")
                     # only if it is a leaf and is a file create or copy it from a preexisting template
                     return createDocumentOrCopyFromTemplate(parentId, component, docsClient, driveClient, nodeId, useTemplate,
                                                      relativePathFromParentForTemplateFile)
