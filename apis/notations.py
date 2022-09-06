@@ -100,7 +100,7 @@ class NotationController(Resource):
         notation = Notation(**data)
         app.app.logger.info(f"create notation request is {notation}")
         try:
-            pathToCreateTemplateFile = f"{notation.language}/{notation.raga}/{notation.tala}/{notation.name}"
+            pathToCreateTemplateFile = f"{notation.language}/{notation.type}/{notation.raga}/{notation.tala}/{notation.name}"
             if notation.workflowEnabled:
                 # if workflow is enabled it has to be created here!
                 pathToCreateTemplateFile = f"NOTATION_REVIEW_FOLDER/{pathToCreateTemplateFile}"
@@ -190,8 +190,8 @@ class NotationMetadataController(Resource):
             notationRow = read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
             app.app.logger.info(
                 f"retrieved row {notationRow} for the document which has to be approved!. Now moving to actual location")
-            oldPathFromRow = f"{NOTATION_REVIEW_FOLDER}/{notationRow.language}/{notationRow.raga}/{notationRow.name}"
-            newApprovedPath = f"{notationRow.language}/{notationRow.raga}/{notationRow.name}"
+            oldPathFromRow = f"{NOTATION_REVIEW_FOLDER}/{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.name}"
+            newApprovedPath = f"{notationRow.language}/{notationRow.type}/{notationRow.raga}/{notationRow.name}"
             move_file(driveClient, PARENT_DRIVE_ID, oldPath=oldPathFromRow, newPath=newApprovedPath)
             app.app.logger.info(
                 f"moved the document from {oldPathFromRow} to {newApprovedPath}. Now changing metadata with status as COMPLETED")
