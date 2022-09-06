@@ -113,7 +113,8 @@ class NotationController(Resource):
             append(sheetsClient, LEGEND_SPREADSHEET_ID, notation)
             app.app.logger.info(f"Added notation row {notation} in the legend spread sheet!")
             return {
-                       "message": f"Successfully created document at path {pathToCreateTemplateFile} with doc id {docId} & also inserted metadata row in the legend spreadsheet!"
+                       "message": f"Successfully created document at path {pathToCreateTemplateFile} with doc id {docId} & also inserted metadata row in the legend spreadsheet!",
+                        "docId": docId
                    }, 200
         except Exception as err:
             error = f"Failure when attempting to create the notation with create notation request {notation}. Exception is {err}"
