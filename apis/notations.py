@@ -4,7 +4,8 @@ from flask import request
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID, PARENT_DRIVE_ID, \
     TEMPLATE_NOTATIONS_RELATIVE_PATH_FROM_PARENT_DRIVE_FOLDER, NOTATION_REVIEW_FOLDER, STATUS
-from core.google_connector.drive import delete_node, create_drive_node
+from core.google_connector.docs import replace_values_in_templated_file
+from core.google_connector.drive import delete_node, create_drive_node, copy_node_into_target, move_file
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
     init_google_sheets_client
 from core.google_connector.sheets import read, delete, update, search, append
@@ -36,7 +37,8 @@ notationModel = api.model("Notation", {
                             description="Status, can take the values (IN PROGRESS, COMPLETED, TO BE REVIEWED)"),
     "ragaMetaData": fields.String(required=False,
                                   description="Additional meta data for raga. e.g. Janyam of 29th melakarta"),
-    "notatedBy": fields.String(required=False, description="Name of the person who has contributed, has to be an email id"),
+    "notatedBy": fields.String(required=False,
+                               description="Name of the person who has contributed, has to be an email id"),
     "reviewedBy": fields.String(required=False,
                                 description="Name of the person who has reviewed it (can be the same as the contributor), has to be an email id"),
     "lastModified": fields.String(required=False, description="String representation of the current timestamp. "),
@@ -76,8 +78,8 @@ class NotationController(Resource):
             delete(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
             app.app.logger.info(f"Successfully deleted the row with the doc id {docId} in the legend spreadsheet!!")
             return {
-                "message": f"Successfully deleted the doc & the row with the doc id {docId} in the legend spreadsheet!!"
-            }, 200
+                       "message": f"Successfully deleted the doc & the row with the doc id {docId} in the legend spreadsheet!!"
+                   }, 200
         except Exception as err:
             error = f"Failure when attempting to delete the notation with doc id {docId}. Exception is {err}"
             app.app.logger.error(error)
@@ -100,29 +102,31 @@ class NotationController(Resource):
         try:
             pathToCreateTemplateFile = f"{notation.language}/{notation.raga}/{notation.tala}/{notation.name}"
             if notation.workflowEnabled:
-                #if workflow is enabled it has to be created here!
+                # if workflow is enabled it has to be created here!
                 pathToCreateTemplateFile = f"NOTATION_REVIEW_FOLDER/{pathToCreateTemplateFile}"
 
             app.app.logger.info(f"Attempting to create a template notation file at the path {pathToCreateTemplateFile}")
-            docId = create_drive_node(docsClient, driveClient, PARENT_DRIVE_ID, pathToCreateTemplateFile, True, True, TEMPLATE_NOTATIONS_RELATIVE_PATH_FROM_PARENT_DRIVE_FOLDER)
+            docId = create_drive_node(docsClient, driveClient, PARENT_DRIVE_ID, pathToCreateTemplateFile, True, True,
+                                      TEMPLATE_NOTATIONS_RELATIVE_PATH_FROM_PARENT_DRIVE_FOLDER)
 
-            #updating the notation with new doc id and doc link which was created
+            # updating the notation with new doc id and doc link which was created
             notation.docId = docId
             notation.docLink = f"https://docs.google.com/document/d/{docId}/edit"
             notation.status = STATUS.IN_PROGRESS.value
 
-            app.app.logger.info(f"Created template file @ path {pathToCreateTemplateFile} with doc id {docId}. Now adding metadata to legend spreadsheet!")
+            app.app.logger.info(
+                f"Created template file @ path {pathToCreateTemplateFile} with doc id {docId}. Now adding metadata to legend spreadsheet!")
             append(sheetsClient, LEGEND_SPREADSHEET_ID, notation)
             app.app.logger.info(f"Added notation row {notation} in the legend spread sheet!")
             return {
                        "message": f"Successfully created document at path {pathToCreateTemplateFile} with doc id {docId} & also inserted metadata row in the legend spreadsheet!",
-                        "docId": docId
+                       "docId": docId
                    }, 200
         except Exception as err:
             error = f"Failure when attempting to create the notation with create notation request {notation}. Exception is {err}"
             app.app.logger.error(error)
             return abort(message=error)
-        
+
     @api.expect(notationModel, validate=True)
     @api.doc("Update existing notation doc after being notated")
     def put(self):
@@ -132,18 +136,35 @@ class NotationController(Resource):
         NOTE: In case there are any edits to the file, they can navigate directly to the doc and edit it!
 
         The status becomes COMPLETED or TO BE REVIEWED based on whether the workflow is active or not
+
+        The request needs to contain only docId and other details which have to be filled in the template file
         '''
         app.app.logger.info("Starting write notation endpoint..")
         data = request.json
         notation = Notation(**data)
         app.app.logger.info(f"write notation request is {notation}")
+        docId = notation.docId
+        workflowEnabled = notation.workflowEnabled
         try:
+            #removing the doc id  in order to create a dictionary of template variables!
+            notation.docId = None
+            notation.workflowEnabled = None
+            templateVars = notation.__dict__
+            replace_values_in_templated_file(docsClient, docId, templateVars)
+
+            # update the sheets with correct status based on workflow enabled flag
+            if workflowEnabled:
+                app.app.logger.info(f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.TO_BE_REVIEWED.value} as workflow is enabled!")
+                update(sheetsClient, LEGEND_SPREADSHEET_ID,Notation(docId=docId, status=STATUS.TO_BE_REVIEWED.value))
+            else:
+                app.app.logger.info(f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.COMPLETED.value}")
+                update(sheetsClient, LEGEND_SPREADSHEET_ID,Notation(docId=docId, status=STATUS.COMPLETED.value))
 
             return {
-                       "message": f"Successfully deleted the doc & the row with the doc id {docId} in the legend spreadsheet!!"
+                       "message": f"Successfully updated the doc with id {docId} with template vars {templateVars}. Updated the status appropriately!"
                    }, 200
         except Exception as err:
-            error = f"Failure when attempting to create the notation with create notation request {notation}. Exception is {err}"
+            error = f"Failure when attempting to write the notation {notation} into doc file with doc id {notation.docId}. Exception is {err}"
             app.app.logger.error(error)
             return abort(message=error)
 
@@ -154,15 +175,37 @@ class NotationMetadataController(Resource):
     @api.expect(docIdParser)
     def get(self):
         '''
-        TODO.
-
         Given docId, it gets the metadata from the google sheets and uses the to be reviewed location derived from the rows to put it into another folder
 
         The status becomes COMPLETED after this.
 
         :return:
         '''
-        pass
+        app.app.logger.info("Starting approval workflow which moves the document")
+        args = docIdParser.parse_args()
+        docId = args["docId"]
+        try:
+            app.app.logger.info(
+                f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
+            notationRow = read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+            app.app.logger.info(
+                f"retrieved row {notationRow} for the document which has to be approved!. Now moving to actual location")
+            oldPathFromRow = f"{NOTATION_REVIEW_FOLDER}/{notationRow.language}/{notationRow.raga}/{notationRow.name}"
+            newApprovedPath = f"{notationRow.language}/{notationRow.raga}/{notationRow.name}"
+            move_file(driveClient, PARENT_DRIVE_ID, oldPath=oldPathFromRow, newPath=newApprovedPath)
+            app.app.logger.info(
+                f"moved the document from {oldPathFromRow} to {newApprovedPath}. Now changing metadata with status as COMPLETED")
+            update(sheetsClient, LEGEND_SPREADSHEET_ID,
+                   Notation(docId=notationRow.docId, status=STATUS.COMPLETED.value))
+            app.app.logger.info(f"updated the metadata for row with id {docId} with status as COMPLETED")
+            return {
+                       "message": f"Successfully approved the doc with docId {notationRow.docId} by moving to correct location and changed the status in the legend spreadsheet!!"
+                   }, 200
+        except Exception as err:
+            error = f"Failure when attempting to perform approval workflow on doc with docId {docId}. Exception is {err}"
+            app.app.logger.error(error)
+            return abort(message=error)
+
 
 @api.route("/metadata")
 class NotationMetadataController(Resource):
