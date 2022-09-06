@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from dateutil.tz import gettz
 from flask_restx import Resource, Namespace, fields, reqparse, abort
 from flask import request
 
@@ -150,7 +153,7 @@ class NotationController(Resource):
         docId = notation.docId
         workflowEnabled = notation.workflowEnabled
         try:
-            #removing the doc id  in order to create a dictionary of template variables!
+            # removing the doc id  in order to create a dictionary of template variables!
             notation.docId = None
             notation.workflowEnabled = None
             templateVars = notation.__dict__
@@ -158,11 +161,17 @@ class NotationController(Resource):
 
             # update the sheets with correct status based on workflow enabled flag
             if workflowEnabled:
-                app.app.logger.info(f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.TO_BE_REVIEWED.value} as workflow is enabled!")
-                update(sheetsClient, LEGEND_SPREADSHEET_ID,Notation(docId=docId, status=STATUS.TO_BE_REVIEWED.value))
+                app.app.logger.info(
+                    f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.TO_BE_REVIEWED.value} as workflow is enabled!")
+                update(sheetsClient, LEGEND_SPREADSHEET_ID, Notation(docId=docId, status=STATUS.TO_BE_REVIEWED.value,
+                                                                     lastModified=str(
+                                                                         datetime.now(tz=gettz('Asia/Kolkata')))))
             else:
-                app.app.logger.info(f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.COMPLETED.value}")
-                update(sheetsClient, LEGEND_SPREADSHEET_ID,Notation(docId=docId, status=STATUS.COMPLETED.value))
+                app.app.logger.info(
+                    f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.COMPLETED.value}")
+                update(sheetsClient, LEGEND_SPREADSHEET_ID, Notation(docId=docId, status=STATUS.COMPLETED.value,
+                                                                     lastModified=str(
+                                                                         datetime.now(tz=gettz('Asia/Kolkata')))))
 
             return {
                        "message": f"Successfully updated the doc with id {docId} with template vars {templateVars}. Updated the status appropriately!"
@@ -199,8 +208,9 @@ class NotationMetadataController(Resource):
             move_file(driveClient, PARENT_DRIVE_ID, oldPath=oldPathFromRow, newPath=newApprovedPath)
             app.app.logger.info(
                 f"moved the document from {oldPathFromRow} to {newApprovedPath}. Now changing metadata with status as COMPLETED")
-            update(sheetsClient, LEGEND_SPREADSHEET_ID,
-                   Notation(docId=notationRow.docId, status=STATUS.COMPLETED.value))
+            update(sheetsClient, LEGEND_SPREADSHEET_ID, Notation(docId=notationRow.docId, status=STATUS.COMPLETED.value,
+                                                                 lastModified=str(
+                                                                     datetime.now(tz=gettz('Asia/Kolkata')))))
             app.app.logger.info(f"updated the metadata for row with id {docId} with status as COMPLETED")
             return {
                        "message": f"Successfully approved the doc with docId {notationRow.docId} by moving to correct location and changed the status in the legend spreadsheet!!"
@@ -249,9 +259,7 @@ class NotationMetadataController(Resource):
             data = request.json
             app.app.logger.info(f"request is {data}")
             notation = Notation(**data)
-            # last modified needs to be explicitly present in request data for it to be filtered
-            if "lastModified" not in data:
-                notation.lastModified = None
+            notation.lastModified = str(datetime.now(tz=gettz('Asia/Kolkata')))
             app.app.logger.info(
                 f"Attempting to update the notation metadata row present in the legend spreadsheet with notation {notation}")
             return update(sheetsClient, LEGEND_SPREADSHEET_ID, notation)
