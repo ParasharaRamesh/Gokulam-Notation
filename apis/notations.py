@@ -52,22 +52,6 @@ docIdParser.add_argument("docId", help="Google document id present in the google
 @api.route("")
 class NotationController(Resource):
     @api.expect(docIdParser)
-    @api.doc("Get the contents of the google doc as is")
-    def get(self):
-        '''
-        TODO
-
-        Given doc id it gets the contents of the file as is.
-
-        NOTE: given then new markup & templating logic for a file it will be hard to reshow this file in the UI.
-
-        Perhaps alternatively, any file that is created can be shared with the gmail user who is notating it so that it becomes easy to edit in google docs itself!
-
-        :return:
-        '''
-        pass
-
-    @api.expect(docIdParser)
     @api.doc("Remove notation doc & its associated metadata in google sheets")
     def delete(self):
         '''
@@ -143,11 +127,9 @@ class NotationController(Resource):
     @api.doc("Update existing notation doc after being notated")
     def put(self):
         '''
-        TODO
-
         This is for writing the notation into the notation doc
 
-        NOTE: In case there are any edits to the file, it is very hard to edit it in place. Therefore, it is better to get the notation and then delete it and then recreate it with the correct content!
+        NOTE: In case there are any edits to the file, they can navigate directly to the doc and edit it!
 
         The status becomes COMPLETED or TO BE REVIEWED based on whether the workflow is active or not
         '''

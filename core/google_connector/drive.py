@@ -317,14 +317,3 @@ def copy_node_into_target(driveClient, source_node_id, target_parent_node_id, ne
         error = f"Unable to copy source node {source_node_id} into target node {target_parent_node_id} with new name {new_name}. Exception is {err}"
         app.app.logger.error(error)
         raise Exception(error)
-
-def share_file(driveClient, nodeId, recipient):
-    '''
-    TODO. share a node id with a recipient!
-
-    :param driveClient:
-    :param nodeId:
-    :param recipient:
-    :return:
-    '''
-    pass
