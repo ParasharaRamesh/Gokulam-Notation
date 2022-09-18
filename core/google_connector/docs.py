@@ -110,17 +110,15 @@ def formatText(client, docId, updateTextStyles):
     {
       'updateTextStyle': {
         'range': {
-          'startIndex': int, (could be inclusive)
-          'endIndex': int
+          'startIndex': int, (inclusive 1 based)
+          'endIndex': int (exclusive)
         },
         'fields': '*', ( or can be each of the keys used in text style)
         'textStyle': {
           'bold': boolean,
           'italic': boolean,
           'underline': boolean,
-          'strikethrough': boolean,
-          'smallCaps': boolean,
-          'backgroundColor': {
+          'backgroundColor': { (This is in case you want to highlight something)
             'color': {
               'rgbColor': {
                 'blue': float (0.0 ->1.0),
@@ -129,7 +127,7 @@ def formatText(client, docId, updateTextStyles):
               }
             }
           },
-          'foregroundColor': {
+          'foregroundColor': { (This is for text color itself)
            'color': {
               'rgbColor': {
                 'blue': float (0.0 ->1.0),
@@ -141,10 +139,6 @@ def formatText(client, docId, updateTextStyles):
           'fontSize': {
             'magnitude': number,
             'unit': 'PT'
-          },
-          'weightedFontFamily': {
-            'fontFamily': string,
-            'weight': int ( 100 -> 900 , multiples of 100)
           },
           "baselineOffset": str (possible values SUPERSCRIPT, SUBSCRIPT, NONE, BASELINE_OFFSET_UNSPECIFIED)
         }

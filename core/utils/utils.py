@@ -164,6 +164,9 @@ def extractAllStyleTags(docsData):
     '''
     TODO
 
+    NOTE: can look at if body.content[i].paragraph.elements[j].textRun.content has any of those style tags
+
+
     Extract all possible style tags and return data in the following format:
 
     Map<compositeStyle, list of pairs of start and end index>
