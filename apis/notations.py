@@ -143,11 +143,33 @@ class NotationController(Resource):
         '''
         This is for writing the notation into the notation doc
 
-        NOTE: In case there are any edits to the file, they can navigate directly to the doc and edit it!
+        In case there are any edits to the file, they can navigate directly to the doc and edit it!
 
         The status becomes COMPLETED or TO BE REVIEWED based on whether the workflow is active or not
 
-        The request needs to contain only docId and other details which have to be filled in the template file
+        The request needs to contain only docId and other details which have to be filled in the template file.
+
+        NOTE: the following syntax is to be followed when sending stylized notations.
+
+        SYNTAX:
+        <style:category1,category2-value1|value2>content inside for which the style has to be applied</style:category1,category2-value1|value2>
+
+        EXPLANATION:
+        apply two styles category1 & category2 to the text inside the tag. category1 is a simple boolean flag (e.g. bold, italic, underline),
+        whereas category2 is a style type which has parameters value1 & value2.
+
+        SIMPLE STYLES: bold, italic, underline
+
+        PARAMETERIZED STYLES:
+        1. fontSize : need another number to indiciate font size ( e.g. 15, 17 etc)
+        2. baselineOffset: can take values of SUPERSCRIPT or SUBSCRIPT
+        3. backgroundColor : takes 3 values for red , green and blue colors. Each number is a float in the range (0.0 -> 1.0). This highlights the text
+        3. foregroundColor : takes 3 values for red , green and blue colors. Each number is a float in the range (0.0 -> 1.0). This changes the very font color of the text
+
+        EXAMPLE:
+        notation with style: | <style:underline>p g d p</style:underline> d p | d <style:bold,foregroundColor-0.8|0.0|0.2>S R G</style:bold,foregroundColor-0.8|0.0|0.2> ||
+        effect: the phrase 'p g d p' is underlined & the phrase 'S R G' is made bold along with changing the font color to something which has the red value of 0.8, the green value of 0.0 and the blue value of 0.2.
+
         '''
         app.app.logger.info("Starting write notation endpoint..")
         data = request.json
