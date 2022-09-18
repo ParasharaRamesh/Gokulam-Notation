@@ -161,7 +161,7 @@ class NotationController(Resource):
         SIMPLE STYLES: bold, italic, underline
 
         PARAMETERIZED STYLES:
-        1. fontSize : need another number to indiciate font size ( e.g. 15, 17 etc)
+        1. fontSize : need another number to indicate font size ( e.g. 15, 17 etc)
         2. baselineOffset: can take values of SUPERSCRIPT or SUBSCRIPT
         3. backgroundColor : takes 3 values for red , green and blue colors. Each number is a float in the range (0.0 -> 1.0). This highlights the text
         3. foregroundColor : takes 3 values for red , green and blue colors. Each number is a float in the range (0.0 -> 1.0). This changes the very font color of the text
