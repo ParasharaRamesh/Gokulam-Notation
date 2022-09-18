@@ -9,6 +9,7 @@ SHEET_NO = 'Sheet1'
 
 LEGEND_SPREADSHEET_ID = os.environ['LEGEND_SPREADSHEET_ID']
 PARENT_DRIVE_ID = os.environ['PARENT_DRIVE_ID']
+
 TEMPLATE_NOTATIONS_RELATIVE_PATH_FROM_PARENT_DRIVE_FOLDER = "templates/notationTemplate"
 
 NOTATION_REVIEW_FOLDER = "notations_yet_to_be_reviewed"
@@ -21,3 +22,8 @@ class STATUS(Enum):
 class LANGUAGES(Enum):
     ENGLISH = "english"
     KANNADA = "kannada"
+
+STYLE_OPENING_TAG = "<style:"
+STYLE_CLOSING_TAG = "</style:"
+CLOSING_TAG = ">"
+STYLE = "style"

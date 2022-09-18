@@ -1,5 +1,7 @@
 import logging
 from flask import Flask
+
+#NOTE: comment out the import statement from apis and the line 'api.init_app' for running experiements locally
 from apis import api
 
 app = Flask(__name__)

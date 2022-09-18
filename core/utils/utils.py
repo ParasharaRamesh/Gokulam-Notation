@@ -1,8 +1,8 @@
 from typing import List
-
 import app
+from core.constants.constants import STYLE_CLOSING_TAG, STYLE_OPENING_TAG, CLOSING_TAG, STYLE
 from core.models.models import Notation
-
+import re
 
 def isStringEmpty(str):
     return (str == None) or (len(str) == 0)
@@ -160,13 +160,74 @@ def apply_notation_masks(data, query: Notation):
 
     return data
 
+def constructUpdateTextStyleRequests(extractedStyleData):
+    '''
+    e.g. the input data can be like
+    {
+        "style:bold": [(1,2), (3,4)],
+        "style:italic,underline": [(10,20), (30,40)],
+        "style:bold,italic,underline": [(45,50)],
+        "style:fontSize-16": [(55,60)],
+        "style:baselineOffset-SUBSCRIPT": [(65,70)],
+        "style:baselineOffset-SUPERSCRIPT,fontSize-19": [(75,80)],
+        "style:backgroundColor-0.0|0.8|0.87": [(85,90)],
+        "style:backgroundColor-0.0|0.8|0.87,foregroundColor-1.0|0.8|0.87": [(91,100)]
+    }
+
+    :param extractedStyleData: return object of extractAllStyleTags function
+    :return: list of updateTextStyle objects ( refer to docs file to see the request object)
+    '''
+    requests = []
+    for style, ranges in extractedStyleData.items():
+        compositeStyles = style.split(":")[1]
+        individualStyles = compositeStyles.split(",")
+        for updateRange in ranges:
+            request = initUpdateTextStyleRequest()
+            request["updateTextStyle"]["range"]["startIndex"] = updateRange[0]
+            request["updateTextStyle"]["range"]["endIndex"] = updateRange[1]
+            for individualStyle in individualStyles:
+                isStyleWithParams = "-" in individualStyle
+                if not isStyleWithParams:
+                    request["updateTextStyle"]["textStyle"][individualStyle] = True
+                else:
+                    parameterizedStyle, params = individualStyle.split("-")
+                    individualParams = params.split("|")
+                    if parameterizedStyle == "baselineOffset":
+                        request["updateTextStyle"]["textStyle"][parameterizedStyle] = individualParams[0]
+                    elif parameterizedStyle == "fontSize":
+                        request["updateTextStyle"]["textStyle"][parameterizedStyle] = {
+                            "unit": "PT",
+                            "magnitude": int(individualParams[0])
+                        }
+                    elif parameterizedStyle in ["backgroundColor", "foregroundColor"]:
+                        request["updateTextStyle"]["textStyle"][parameterizedStyle] = {
+                            "color": {
+                                "rgbColor": {
+                                    "red": float(individualParams[0]),
+                                    "green": float(individualParams[1]),
+                                    "blue": float(individualParams[2])
+                                }
+                            }
+                        }
+            requests.append(request)
+    return requests
+
+def initUpdateTextStyleRequest():
+    '''
+    Constructs an empty updateTextStyleRequest object
+
+    :return:
+    '''
+    return {
+        "updateTextStyle": {
+            "fields": "*",
+            "textStyle": {},
+            "range": {}
+        }
+    }
+
 def extractAllStyleTags(docsData):
     '''
-    TODO
-
-    NOTE: can look at if body.content[i].paragraph.elements[j].textRun.content has any of those style tags
-
-
     Extract all possible style tags and return data in the following format:
 
     Map<compositeStyle, list of pairs of start and end index>
@@ -176,13 +237,54 @@ def extractAllStyleTags(docsData):
     :param docsData: json data from google docs
     :return:
     '''
-    pass
+    try:
+        docId = docsData["documentId"]
+        app.app.logger.info(f"Extracting the style tags from the document with doc id {docId}")
+        allStyles = dict()
 
-def constructUpdateTextStyleRequests(extractStyleData):
-    '''
-    TODO
+        #get only the paragraph contents
+        contents = list(filter(lambda content: "paragraph" in content, docsData["body"]["content"]))
+        for content in contents:
+            paragraphElements = content["paragraph"]["elements"]
+            paragraphStartIndex = None
+            text = ""
+            paragraphElementsTextContents = list(map(lambda paragraphElement: paragraphElement["textRun"]["content"] , paragraphElements))
+            isStyled = len(list(filter(lambda content: STYLE in content, paragraphElementsTextContents))) > 0
+            if isStyled:
+                for i, paragraphElement in enumerate(paragraphElements):
+                    # this is required because sometimes the same line can be broken up into multiple paragraph elements. Therefore collating everything
+                    if i == 0:
+                        paragraphStartIndex = paragraphElement["startIndex"]
+                    text += paragraphElement["textRun"]["content"]
 
-    :param extractStyleData: return object of extractAllStyleTags function
-    :return: list of updateTextStyle objects ( refer to docs file to see the request object)
-    '''
-    pass
+                #now we have the line with all the style tags, now we have to add it to our allStyles dict after figuring out the starting and ending index
+                if paragraphStartIndex != None:
+                    allStyleOpeningTagPositions = [m.start() for m in re.finditer(STYLE_OPENING_TAG, text)]
+                    allStyleClosingTagPositions = [m.start() for m in re.finditer(STYLE_CLOSING_TAG, text)]
+
+                    assert(len(allStyleOpeningTagPositions) == len(allStyleClosingTagPositions))
+
+                    for styleOpeningPosition, styleClosingPosition in zip(allStyleOpeningTagPositions, allStyleClosingTagPositions):
+                        # find the index of the closest closing tag ">" from the opening style bracket
+                        indexForClosingAngularTagForOpeningStyleTag = styleOpeningPosition
+                        while indexForClosingAngularTagForOpeningStyleTag <= styleClosingPosition:
+                            if text[indexForClosingAngularTagForOpeningStyleTag] == CLOSING_TAG:
+                                break
+                            indexForClosingAngularTagForOpeningStyleTag += 1
+
+                        #style tag is the sliced string inside this tag
+                        style = text[styleOpeningPosition + 1: indexForClosingAngularTagForOpeningStyleTag]
+
+                        # plus 1 to account for "/" and plus 2 to account for ">" and extra one more for exclusivity in range
+                        styleRange = (paragraphStartIndex + styleOpeningPosition, paragraphStartIndex + styleClosingPosition + 1 + len(style) + 2)
+                        if style not in allStyles:
+                            allStyles[style] = [styleRange]
+                        else:
+                            allStyles[style].append(styleRange)
+
+        return allStyles
+    except Exception as err:
+        error = f"Unable to extract the style tags from the document with doc id {docId}. Exception is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+

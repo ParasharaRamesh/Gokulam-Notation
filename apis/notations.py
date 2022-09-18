@@ -7,7 +7,8 @@ from flask import request
 import app
 from core.constants.constants import LEGEND_SPREADSHEET_ID, PARENT_DRIVE_ID, \
     TEMPLATE_NOTATIONS_RELATIVE_PATH_FROM_PARENT_DRIVE_FOLDER, NOTATION_REVIEW_FOLDER, STATUS
-from core.google_connector.docs import replace_values_in_templated_file
+from core.google_connector.docs import replace_values_in_templated_file, get_document, formatText, \
+    replaceAllStyleTagsWithEmptyString
 from core.google_connector.drive import delete_node, create_drive_node, copy_node_into_target, move_file
 from core.google_connector.google_client import init_google_docs_client, init_google_drive_client, \
     init_google_sheets_client
@@ -15,6 +16,8 @@ from core.google_connector.sheets import read, delete, update, search, append
 from core.models.models import Notation
 
 # initializing all of the various google connector clients
+from core.utils.utils import extractAllStyleTags, constructUpdateTextStyleRequests
+
 docsClient = init_google_docs_client()
 driveClient = init_google_drive_client()
 sheetsClient = init_google_sheets_client()
@@ -158,26 +161,25 @@ class NotationController(Resource):
             notation.workflowEnabled = None
             templateVars = notation.__dict__
             replace_values_in_templated_file(docsClient, docId, templateVars)
-            '''
-            TODO
-            
+
+            app.app.logger.info(f"Finished writing into doc id {docId} now updating the styles by parsing the notation tags and by performing a batch update")
+
             docsData = get_document(docsClient, docId)
-            extractedStyleData = extractAllMarkdownTags(docsData)
+            extractedStyleData = extractAllStyleTags(docsData)
             constructedUpdateStyleRequestData = constructUpdateTextStyleRequests(extractedStyleData)
-            formatResponse = formatText(docsClient, docId, constructedUpdateStyleRequestData)
+            formatText(docsClient, docId, constructedUpdateStyleRequestData)
             replaceAllStyleTagsWithEmptyString(docsClient, docId, extractedStyleData)
-            '''
 
             # update the sheets with correct status based on workflow enabled flag
             if workflowEnabled:
                 app.app.logger.info(
-                    f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.TO_BE_REVIEWED.value} as workflow is enabled!")
+                    f"Finished updating the styles into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.TO_BE_REVIEWED.value} as workflow is enabled!")
                 update(sheetsClient, LEGEND_SPREADSHEET_ID, Notation(docId=docId, status=STATUS.TO_BE_REVIEWED.value,
                                                                      lastModified=str(
                                                                          datetime.now(tz=gettz('Asia/Kolkata')))))
             else:
                 app.app.logger.info(
-                    f"Finished writing into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.COMPLETED.value}")
+                    f"Finished updating the styles into doc with doc id {docId}. Now changing the status in legend spreadsheet with id {STATUS.COMPLETED.value}")
                 update(sheetsClient, LEGEND_SPREADSHEET_ID, Notation(docId=docId, status=STATUS.COMPLETED.value,
                                                                      lastModified=str(
                                                                          datetime.now(tz=gettz('Asia/Kolkata')))))

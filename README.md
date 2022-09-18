@@ -18,7 +18,10 @@ _**Syntax**_:
 **_Examples_**:
 
 1. <style:bold,italic,underline> </style:bold,italic,underline>
-2. <style:bgColor-0.0|0.9|0.8,fgColor-0.4|0.4|0.9> </style:bgColor-0.0|0.9|0.8,fgColor-0.4|0.4|0.9>
+2. <style:backgroundColor-0.0|0.9|0.8,foregroundColor-0.4|0.4|0.9> </style:backgroundColor-0.0|0.9|0.8,foregroundColor-0.4|0.4|0.9>
 3. <style:fontSize-14> </style:fontSize-14>
 4. <style:baselineOffset-SUPERSCRIPT> </style:baselineOffset-SUPERSCRIPT>
 5. <style:baselineOffset-SUBSCRIPT> </style:baselineOffset-SUBSCRIPT>
+
+
+<style:bold,foregroundColor-0.0,0.0,1.0>S R G M</style:bold,foregroundColor-0.0,0.0,1.0> | P <style:italic,foregroundColor-1.0,0.0,0.0>D N S</style:bold,foregroundColor-1.0,0.0,0.0> ||

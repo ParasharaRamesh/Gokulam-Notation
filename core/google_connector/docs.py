@@ -113,7 +113,7 @@ def formatText(client, docId, updateTextStyles):
           'startIndex': int, (inclusive 1 based)
           'endIndex': int (exclusive)
         },
-        'fields': '*', ( or can be each of the keys used in text style)
+        'fields': '*',
         'textStyle': {
           'bold': boolean,
           'italic': boolean,
@@ -152,16 +152,14 @@ def formatText(client, docId, updateTextStyles):
         app.app.logger.info(
             f"Updating the text style in the document with docId {docId} with request body {requests}")
         result = client.documents().batchUpdate(documentId=docId, body={"requests": requests}).execute()
-        app.app.logger.info()
         return result
     except Exception as err:
         error = f"Unable to update the text style in the document with docId {docId} with request body {updateTextStyles}. Exception is {err}"
         app.app.logger.error(error)
         raise Exception(error)
 
-def replaceAllStyleTagsWithEmptyString(docsClient, docId, extractStyleData):
+def replaceAllStyleTagsWithEmptyString(client, docId, extractedStyleData):
     '''
-    TODO
 
     This returns a map of all keys in the request body along with its corresponding closing tag with the values all as empty string
 
@@ -174,7 +172,22 @@ def replaceAllStyleTagsWithEmptyString(docsClient, docId, extractStyleData):
 
      then call the replace_values_in_templated_file function
 
-    :param extractStyleData: return object of extractAllStyleTags function
+    :param client: docs client
+    :param docId: document id
+    :param extractedStyleData: return object of extractAllStyleTags function
     :return:
     '''
-    pass
+    try:
+        app.app.logger.info(f"Attempting to replace all the style tags {list(extractedStyleData.keys())} in the file with doc id {docId}.")
+        templateVars = dict()
+        for style in extractedStyleData.keys():
+            #NOTE: the opening and closing angular brackets are put in the replace_values_in_templated_file function
+            openBracesStyleTag = f"{style}"
+            closeBracesStyleTag = f"/{style}"
+            templateVars[openBracesStyleTag] = ""
+            templateVars[closeBracesStyleTag] = ""
+        return replace_values_in_templated_file(client, docId, templateVars)
+    except Exception as err:
+        error = f"Unable to replace all the style tags {list(extractedStyleData.keys())} in the file with doc id {docId}. Exception is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
