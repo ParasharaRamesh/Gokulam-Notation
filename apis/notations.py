@@ -151,7 +151,7 @@ class NotationController(Resource):
 
         NOTE: the following syntax is to be followed when sending stylized notations.
 
-        SYNTAX:
+        SYNTAX: (opening and closing tags should have the same value as the logic is built based on that assumption!)
         <style:category1,category2-value1|value2>content inside for which the style has to be applied</style:category1,category2-value1|value2>
 
         EXPLANATION:
