@@ -1,8 +1,12 @@
 # Contains apis related to google docs
 '''
 TODO:
-1. still have to figure out how to format text after replacing it in a templated file
-2. have to write a parser to format each of the text appropriately
+Implement the following methods:
+
+1. format text https://developers.google.com/docs/api/how-tos/format-text ( make it generic enough for formatting with anystyle)
+2. method to delete specific tags ( use the replace all text method and replace with empty string in the end)
+3. read document and find all the location of the tags ( give all tags, it should give a Map<tag, list of pairs ( start and end)>, note a tag can be a complex tag with multiple styles together
+
 '''
 
 import app
