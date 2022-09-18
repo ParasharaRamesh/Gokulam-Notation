@@ -158,6 +158,15 @@ class NotationController(Resource):
             notation.workflowEnabled = None
             templateVars = notation.__dict__
             replace_values_in_templated_file(docsClient, docId, templateVars)
+            '''
+            TODO
+            
+            docsData = get_document(docsClient, docId)
+            extractedStyleData = extractAllMarkdownTags(docsData)
+            constructedUpdateStyleRequestData = constructUpdateTextStyleRequests(extractedStyleData)
+            formatResponse = formatText(docsClient, docId, constructedUpdateStyleRequestData)
+            replaceAllStyleTagsWithEmptyString(docsClient, docId, extractedStyleData)
+            '''
 
             # update the sheets with correct status based on workflow enabled flag
             if workflowEnabled:

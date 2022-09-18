@@ -1,16 +1,5 @@
 # Contains apis related to google docs
-'''
-TODO:
-Implement the following methods:
-
-1. format text https://developers.google.com/docs/api/how-tos/format-text ( make it generic enough for formatting with anystyle)
-2. method to delete specific tags ( use the replace all text method and replace with empty string in the end)
-3. read document and find all the location of the tags ( give all tags, it should give a Map<tag, list of pairs ( start and end)>, note a tag can be a complex tag with multiple styles together
-
-'''
-
 import app
-
 
 def get_document(client, docId):
     '''
@@ -111,3 +100,87 @@ def replace_values_in_templated_file(client, templatedDocId, templateVars):
         error = f"Unable to resolve template variables in the file with doc id {templatedDocId} . Exception is {err}"
         app.app.logger.error(error)
         raise Exception(error)
+
+
+def formatText(client, docId, updateTextStyles):
+    '''
+    :param client:
+    :param docId:
+    :param updateTextStyles: list of objects where each object is of the form
+    {
+      'updateTextStyle': {
+        'range': {
+          'startIndex': int, (could be inclusive)
+          'endIndex': int
+        },
+        'fields': '*', ( or can be each of the keys used in text style)
+        'textStyle': {
+          'bold': boolean,
+          'italic': boolean,
+          'underline': boolean,
+          'strikethrough': boolean,
+          'smallCaps': boolean,
+          'backgroundColor': {
+            'color': {
+              'rgbColor': {
+                'blue': float (0.0 ->1.0),
+                'green': float (0.0 ->1.0),
+                'red': float (0.0 ->1.0)
+              }
+            }
+          },
+          'foregroundColor': {
+           'color': {
+              'rgbColor': {
+                'blue': float (0.0 ->1.0),
+                'green': float (0.0 ->1.0),
+                'red': float (0.0 ->1.0)
+              }
+            }
+          },
+          'fontSize': {
+            'magnitude': number,
+            'unit': 'PT'
+          },
+          'weightedFontFamily': {
+            'fontFamily': string,
+            'weight': int ( 100 -> 900 , multiples of 100)
+          },
+          "baselineOffset": str (possible values SUPERSCRIPT, SUBSCRIPT, NONE, BASELINE_OFFSET_UNSPECIFIED)
+        }
+      }
+    }
+
+    :return:
+    '''
+    try:
+        requests = updateTextStyles
+        app.app.logger.info(
+            f"Updating the text style in the document with docId {docId} with request body {requests}")
+        result = client.documents().batchUpdate(documentId=docId, body={"requests": requests}).execute()
+        app.app.logger.info()
+        return result
+    except Exception as err:
+        error = f"Unable to update the text style in the document with docId {docId} with request body {updateTextStyles}. Exception is {err}"
+        app.app.logger.error(error)
+        raise Exception(error)
+
+def replaceAllStyleTagsWithEmptyString(docsClient, docId, extractStyleData):
+    '''
+    TODO
+
+    This returns a map of all keys in the request body along with its corresponding closing tag with the values all as empty string
+
+    This is required to replace all of these tags with an empty string later on.
+
+    e.g. {
+        "<style:bold,italic>": "",
+        "</style:bold,italic>": ""
+     }
+
+     then call the replace_values_in_templated_file function
+
+    :param extractStyleData: return object of extractAllStyleTags function
+    :return:
+    '''
+    pass

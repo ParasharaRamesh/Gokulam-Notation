@@ -159,3 +159,27 @@ def apply_notation_masks(data, query: Notation):
         data = data[mask]
 
     return data
+
+def extractAllStyleTags(docsData):
+    '''
+    TODO
+
+    Extract all possible style tags and return data in the following format:
+
+    Map<compositeStyle, list of pairs of start and end index>
+
+    composite style could be tags where there are more than one style applied
+
+    :param docsData: json data from google docs
+    :return:
+    '''
+    pass
+
+def constructUpdateTextStyleRequests(extractStyleData):
+    '''
+    TODO
+
+    :param extractStyleData: return object of extractAllStyleTags function
+    :return: list of updateTextStyle objects ( refer to docs file to see the request object)
+    '''
+    pass
