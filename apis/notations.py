@@ -264,6 +264,9 @@ class NotationMetadataController(Resource):
         This endpoint is for getting the notation metadata saved in the google sheets , given a google doc id
 
         docId is a required url parameter
+
+        NOTE: if docId is 'all' then all rows from the excel file are fetched!
+
         :return:
         '''
         app.app.logger.info("Starting get notation endpoint..")
