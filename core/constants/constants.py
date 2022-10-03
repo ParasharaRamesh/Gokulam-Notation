@@ -27,3 +27,5 @@ STYLE_OPENING_TAG = "<style:"
 STYLE_CLOSING_TAG = "</style:"
 CLOSING_TAG = ">"
 STYLE = "style"
+
+ALL = "all"

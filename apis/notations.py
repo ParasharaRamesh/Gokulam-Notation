@@ -256,7 +256,7 @@ class NotationMetadataController(Resource):
 
 @api.route("/metadata")
 class NotationMetadataController(Resource):
-    @api.marshal_with(notationModel, skip_none=True)
+    @api.marshal_list_with(notationModel, skip_none=True)
     @api.doc("Get notation metadata")
     @api.expect(docIdParser)
     def get(self):
@@ -272,10 +272,11 @@ class NotationMetadataController(Resource):
         try:
             app.app.logger.info(
                 f"Attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}")
-            notation = read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
-            # if the status is to be reviewed then we know that workflow is enabled!
-            notation.workflowEnabled = notation.status == STATUS.TO_BE_REVIEWED
-            return notation
+            notations = read(sheetsClient, LEGEND_SPREADSHEET_ID, docId)
+            for notation in notations:
+                # if the status is to be reviewed then we know that workflow is enabled!
+                notation.workflowEnabled = notation.status == STATUS.TO_BE_REVIEWED
+            return notations
         except Exception as err:
             error = f"Failure when attempting to get the notation row present in the legend spreadsheet for row with doc id {docId}. Exception is {err}"
             app.app.logger.error(error)

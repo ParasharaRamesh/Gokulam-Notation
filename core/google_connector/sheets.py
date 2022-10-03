@@ -1,7 +1,7 @@
 # Contains apis related to google sheets
 from typing import List
 
-from core.constants.constants import SHEET_NO
+from core.constants.constants import SHEET_NO, ALL
 from core.models.models import Notation
 from core.utils.utils import construct_row_from_notation, construct_notations_from_row, \
     updateNotationWithOnlyFieldsWhichHaveChanged, apply_notation_masks
@@ -42,9 +42,11 @@ def read(sheetsClient, spreadSheetId, docId):
         app.app.logger.info(
             f"Attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}")
         data = get_data_as_dataframe(sheetsClient, spreadSheetId)
-        mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
-        row = data[mask].reset_index().to_dict("list")
-        return construct_notations_from_row(row)[0]
+        if docId != ALL:
+            # if we want to fetch only specific doc ids
+            mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
+            row = data[mask].reset_index().to_dict("list")
+        return construct_notations_from_row(row)
     except Exception as err:
         error = f"Error while attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
         app.app.logger.error(error)
