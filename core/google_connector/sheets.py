@@ -45,8 +45,9 @@ def read(sheetsClient, spreadSheetId, docId):
         if docId != ALL:
             # if we want to fetch only specific doc ids
             mask = data["Google Doc Id"].str.contains(docId, case=True, na=False)
-            row = data[mask].reset_index().to_dict("list")
-        return construct_notations_from_row(row)
+            data = data[mask]
+        rows = data.reset_index().to_dict("list")
+        return construct_notations_from_row(rows)
     except Exception as err:
         error = f"Error while attempting to read metadata from spreadSheet with id {spreadSheetId} for doc with id {docId}. Error is {err}"
         app.app.logger.error(error)
