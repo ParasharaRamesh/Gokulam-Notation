@@ -8,3 +8,4 @@ flask == 2.1.2
 flask-restx >= 0.5.1
 werkzeug == 2.0.2
 pandas
+flask-cors
